@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,6 +14,9 @@ type Request struct {
 func main() {
 	r := gin.Default()
 
+	// fixme: デプロイ前に詳細を設定する
+	r.Use(cors.Default())
+
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "healthy",
@@ -21,7 +25,7 @@ func main() {
 
 	r.POST("/process", process)
 
-	r.Run() // listen and serve on 0.0.0.0:8080
+	r.Run(":8080")
 }
 
 func process(c *gin.Context) {
