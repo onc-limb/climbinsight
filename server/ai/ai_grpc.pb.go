@@ -4,7 +4,7 @@
 // - protoc             v5.29.3
 // source: ai.proto
 
-package climbinsight
+package ai
 
 import (
 	context "context"
