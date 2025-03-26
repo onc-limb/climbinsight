@@ -11,7 +11,7 @@ export default function Home() {
       body: JSON.stringify({ input: 'Hello' })
     })
     const data = await res.json()
-    setResponse(data.output)
+    setResponse(data.result)
   }
 
   return (
