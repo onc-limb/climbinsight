@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package ai;
 
-option go_package = "ClimbInsight/server/ai;ai";
+option go_package = "climbinsight/server/ai;ai";
 
 // サービス定義：AIService という名前のサービスを定義する
 service AIService {
