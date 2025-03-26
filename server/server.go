@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -11,7 +12,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"climbinsight/server/ai"
 	pb "climbinsight/server/ai"
 )
 
@@ -19,8 +19,8 @@ type Request struct {
 	Input string `json:"input"`
 }
 
-type AIServiceClient interface {
-	Process(ctx context.Context, req *ai.InputRequest) (*ai.OutputResponse, error)
+type Client struct {
+	AiClient pb.AIServiceClient
 }
 
 func main() {
@@ -31,25 +31,9 @@ func main() {
 	defer conn.Close()
 
 	// クライアントの作成
-	client := pb.NewAIServiceClient(conn)
-
-	// リクエスト構築
-	req := &pb.InputRequest{
-		Input: "Hello from Go!",
+	client := &Client{
+		AiClient: pb.NewAIServiceClient(conn),
 	}
-
-	// タイムアウト付きコンテキスト
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	// RPC 呼び出し
-	res, err := client.Process(ctx, req)
-	if err != nil {
-		log.Fatalf("❌ 呼び出し失敗: %v", err)
-	}
-
-	// レスポンス出力
-	log.Printf("✅ AI応答: %s", res.Output)
 
 	r := gin.Default()
 
@@ -62,18 +46,34 @@ func main() {
 		})
 	})
 
-	r.POST("/process", process)
+	r.POST("/process", client.process)
 
 	r.Run(":8080")
 }
 
-func process(c *gin.Context) {
+func (client *Client) process(c *gin.Context) {
 	var req Request
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
+	// リクエスト構築
+	input := &pb.InputRequest{
+		Input: req.Input,
+	}
+
+	// タイムアウト付きコンテキスト
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// RPC 呼び出し
+	res, err := client.AiClient.Process(ctx, input)
+	if err != nil {
+		log.Fatalf("❌ 呼び出し失敗: %v", err)
+	}
+
+	// レスポンス出力
 	c.JSON(http.StatusOK, gin.H{
-		"result": "ok",
+		"result": fmt.Sprintf(`✅ AI応答: %s`, res.Output),
 	})
 }
