@@ -1,23 +1,122 @@
 'use client'
-import { useState } from 'react'
+import Image from "next/image";
+import React, { useState } from "react";
 
-export default function Home() {
-  const [response, setResponse] = useState('')
+export default function TopPage() {
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [grade, setGrade] = useState("V0");
+  const [gym, setGym] = useState("");
+  const [style, setStyle] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSend = async () => {
-    const res = await fetch('http://localhost:8080/process', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ input: 'Hello' })
-    })
-    const data = await res.json()
-    setResponse(data.result)
-  }
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        setError("画像ファイルを選択してください。");
+        return;
+      }
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
+      setError(null);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!image || !gym || !style) {
+      setError("全ての項目を入力してください。");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append("image", image);
+    formData.append("grade", grade);
+    formData.append("gym", gym);
+    formData.append("style", style);
+
+    try {
+      const res = await fetch("/api/process", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error("AIサーバーとの通信に失敗しました。");
+      }
+
+      const data = await res.json();
+      console.log("🧠 AI Response:", data);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <main>
-      <button onClick={handleSend}>送信</button>
-      <p>AIからの返答: {response}</p>
-    </main>
-  )
+    <div className="max-w-xl mx-auto p-6 space-y-6">
+      <h1 className="text-2xl font-bold">ClimbInsight</h1>
+      <p className="text-gray-600">課題の画像をアップロードして課題情報を記録しましょう！</p>
+
+      {imagePreview && (
+        <Image src={imagePreview} alt="Preview" width={500} height={400} className="w-full rounded-lg shadow" />
+      )}
+
+      <input type="file" accept="image/*" onChange={handleImageChange} />
+
+      <div className="space-y-2">
+        <div>
+          <label className="block text-sm font-medium">グレード</label>
+          <select
+            value={grade}
+            onChange={(e) => setGrade(e.target.value)}
+            className="border rounded px-2 py-1 w-full"
+          >
+            {[...Array(10)].map((_, i) => (
+              <option key={i} value={`V${i}`}>
+                V{i}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium">ジム名</label>
+          <input
+            type="text"
+            value={gym}
+            onChange={(e) => setGym(e.target.value)}
+            className="border rounded px-2 py-1 w-full"
+            placeholder="例: B-PUMP 荻窪"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium">課題スタイル</label>
+          <input
+            type="text"
+            value={style}
+            onChange={(e) => setStyle(e.target.value)}
+            className="border rounded px-2 py-1 w-full"
+            placeholder="例: スラブ / ルーフ / 足自由 など"
+          />
+        </div>
+      </div>
+
+      {error && <p className="text-red-600 text-sm">⚠ {error}</p>}
+
+      <button
+        onClick={handleSubmit}
+        disabled={loading}
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+      >
+        {loading ? "送信中..." : "送信して登録する"}
+      </button>
+    </div>
+  );
 }
