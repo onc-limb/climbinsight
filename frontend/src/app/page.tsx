@@ -59,7 +59,7 @@ export default function TopPage() {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-6 space-y-6">
+    <main className="max-w-xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold">ClimbInsight</h1>
       <p className="text-gray-600">課題の画像をアップロードして課題情報を記録しましょう！</p>
 
@@ -117,6 +117,6 @@ export default function TopPage() {
       >
         {loading ? "送信中..." : "送信して登録する"}
       </button>
-    </div>
+    </main>
   );
 }
