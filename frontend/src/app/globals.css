@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f9fafb; /* 明るめのグレー */
+  --background: #FFF7ED; /* 明るめのグレー */
   --foreground: #1f2937; /* ダークグレー（文字色） */
 }
 

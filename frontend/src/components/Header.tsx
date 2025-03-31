@@ -5,7 +5,7 @@ import Image from "next/image";
 
 export default function Header() {
   return (
-    <header className="bg-white shadow-md">
+    <header className="bg-orange-200 shadow text-orange-900">
       <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
           <Image src="/Logo.jpg" alt="Logo" height={100} width={100} className="h-16 w-16" />

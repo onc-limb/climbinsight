@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-100 text-center py-4 mt-12 text-sm text-gray-600">
+    <footer className="bg-orange-100 text-center py-4 mt-12 text-sm text-orange-800">
       <p>
         <Link href="/terms" className="underline hover:text-gray-800">
           利用規約
