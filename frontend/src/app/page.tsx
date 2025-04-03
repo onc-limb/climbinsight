@@ -41,7 +41,8 @@ export default function TopPage() {
     formData.append("style", style);
 
     try {
-      const res = await fetch("/api/process", {
+        console.log("ここを確認：", process.env.NEXT_PUBLIC_API_URL)
+        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/process", {
         method: "POST",
         body: formData,
       });
@@ -79,7 +80,7 @@ export default function TopPage() {
     onChange={handleImageChange}
     className="hidden"
   />
-</div>) :  
+</div>) : 
  (
     <div className="space-y-2">
       <Image
