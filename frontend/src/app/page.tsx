@@ -8,6 +8,7 @@ export default function TopPage() {
   const [grade, setGrade] = useState("V0");
   const [gym, setGym] = useState("");
   const [style, setStyle] = useState("");
+  const [tryCount, setTryCount] = useState(0)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,8 +68,22 @@ export default function TopPage() {
         <Image src={imagePreview} alt="Preview" width={500} height={400} className="w-full rounded-lg shadow" />
       )}
 
-      <input type="file" accept="image/*" onChange={handleImageChange} />
-
+<div className="space-y-4">
+  <label
+    htmlFor="file-upload"
+    className="cursor-pointer flex flex-col items-center justify-center border-2 border-dashed border-orange-300 rounded-lg p-6 text-orange-700 hover:bg-orange-100 transition"
+  >
+    <span className="text-sm font-medium mb-2">画像をここにアップロード またはクリックして選択</span>
+    <span className="text-xs text-orange-500">(JPEG / PNG / HEIC など対応)</span>
+  </label>
+  <input
+    id="file-upload"
+    type="file"
+    accept="image/*"
+    onChange={handleImageChange}
+    className="hidden"
+  />
+</div>
       <div className="space-y-2">
         <div>
           <label className="block text-sm font-medium">グレード</label>
@@ -107,13 +122,24 @@ export default function TopPage() {
           />
         </div>
       </div>
+        <div>
+          <label className="block text-sm font-medium">トライ回数</label>
+          <input
+            type="number"
+            value={tryCount}
+            onChange={(e) => setTryCount(Number(e.target.value))}
+            className="border rounded px-2 py-1 w-full"
+            placeholder="トライ回数を入力してください"
+          />
+        </div>
+
 
       {error && <p className="text-red-600 text-sm">⚠ {error}</p>}
 
       <button
         onClick={handleSubmit}
         disabled={loading}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+        className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-700 disabled:opacity-50"
       >
         {loading ? "送信中..." : "送信して登録する"}
       </button>
