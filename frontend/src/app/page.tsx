@@ -64,11 +64,7 @@ export default function TopPage() {
       <h1 className="text-2xl font-bold">ClimbInsight</h1>
       <p className="text-gray-600">課題の画像をアップロードして課題情報を記録しましょう！</p>
 
-      {imagePreview && (
-        <Image src={imagePreview} alt="Preview" width={500} height={400} className="w-full rounded-lg shadow" />
-      )}
-
-<div className="space-y-4">
+      {!imagePreview ? (<div className="space-y-4">
   <label
     htmlFor="file-upload"
     className="cursor-pointer flex flex-col items-center justify-center border-2 border-dashed border-orange-300 rounded-lg p-6 text-orange-700 hover:bg-orange-100 transition"
@@ -83,7 +79,29 @@ export default function TopPage() {
     onChange={handleImageChange}
     className="hidden"
   />
-</div>
+</div>) :  
+ (
+    <div className="space-y-2">
+      <Image
+        src={imagePreview}
+        alt="Preview"
+        width={500}
+        height={400}
+        className="w-full rounded-lg shadow"
+      />
+      <div className="text-right">
+        <button
+          className="text-sm text-orange-700 hover:text-orange-900 border border-orange-700 rounded px-3 py-1 hover:shadow-lg"
+          onClick={() => {
+            setImage(null);
+            setImagePreview(null);
+          }}
+        >
+          画像を取り消す
+        </button>
+      </div>
+    </div>
+  )}
       <div className="space-y-2">
         <div>
           <label className="block text-sm font-medium">グレード</label>
