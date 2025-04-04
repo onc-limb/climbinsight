@@ -1,11 +1,12 @@
 package main
 
 import (
-	"context"
+	"encoding/base64"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
-	"time"
+	"strconv"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -15,8 +16,11 @@ import (
 	pb "climbinsight/server/ai"
 )
 
-type Request struct {
-	Input string `json:"input"`
+type Contents struct {
+	Grade    string `form:"grade"`
+	Gym      string `form:"gym"`
+	Style    string `form:"style"`
+	TryCount uint   `form:"tryCount"`
 }
 
 type Client struct {
@@ -52,28 +56,51 @@ func main() {
 }
 
 func (client *Client) process(c *gin.Context) {
-	var req Request
-	if err := c.ShouldBindJSON(&req); err != nil {
+	// 画像ファイルを受け取る
+	handler, err := c.FormFile("image")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "画像のアップロードに失敗しました"})
+		return
+	}
+	file, err := handler.Open()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ファイルが開けませんでした"})
+		return
+	}
+	defer file.Close()
+
+	imageBytes, err := io.ReadAll(file)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ファイルの読み込みに失敗しました"})
+		return
+	}
+	imageBase64 := base64.StdEncoding.EncodeToString(imageBytes)
+	mimeType := http.DetectContentType(imageBytes)
+	imageDataURL := fmt.Sprintf("data:%s;base64,%s", mimeType, imageBase64)
+
+	var content Contents
+	if err := c.Bind(&content); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 	// リクエスト構築
-	input := &pb.InputRequest{
-		Input: req.Input,
-	}
+	// input := &pb.InputRequest{
+	// 	Input: string(imageBytes),
+	// }
 
-	// タイムアウト付きコンテキスト
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	// // タイムアウト付きコンテキスト
+	// ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	// defer cancel()
 
-	// RPC 呼び出し
-	res, err := client.AiClient.Process(ctx, input)
-	if err != nil {
-		log.Fatalf("❌ 呼び出し失敗: %v", err)
-	}
+	// // RPC 呼び出し
+	// res, err := client.AiClient.Process(ctx, input)
+	// if err != nil {
+	// 	log.Fatalf("❌ 呼び出し失敗: %v", err)
+	// }
 
 	// レスポンス出力
 	c.JSON(http.StatusOK, gin.H{
-		"result": fmt.Sprintf(`✅ AI応答: %s`, res.Output),
+		"imageData": imageDataURL,
+		"content":   content.Grade + " : " + content.Gym + " : " + content.Style + " : " + strconv.Itoa(int(content.TryCount)) + ";",
 	})
 }
