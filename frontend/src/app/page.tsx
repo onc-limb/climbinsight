@@ -1,8 +1,11 @@
 'use client'
 import Image from "next/image";
 import React, { useState } from "react";
+import { useResultStore } from '@/stores/resultStore';
+import { useRouter } from 'next/navigation';
 
 export default function TopPage() {
+  const router = useRouter();
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [grade, setGrade] = useState("V0");
@@ -53,6 +56,10 @@ export default function TopPage() {
 
       const data = await res.json();
       console.log("🧠 AI Response:", data);
+      
+      // zustand に保存して遷移
+      useResultStore.getState().setResult(data.imageData, data.caption);
+      router.push('/result');
     } catch (err) {
       setError((err as Error).message);
     } finally {
