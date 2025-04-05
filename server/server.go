@@ -27,7 +27,11 @@ func main() {
 	// AIサービスの作成
 	ies := infra.NewImageEditService(conn)
 
-	ph := presentation.NewProcessHandler(ies)
+	tgs := infra.NewTextGenerateService()
+
+	sh, _ := infra.NewStorageHandler()
+
+	ph := presentation.NewProcessHandler(ies, tgs, sh)
 
 	r := gin.Default()
 

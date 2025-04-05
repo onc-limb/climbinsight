@@ -10,11 +10,12 @@ import (
 )
 
 type ProcessHandler struct {
-	imageEditService domain.IImageEditService
+	services usecase.Services
+	storage  domain.IStorageHandler
 }
 
-func NewProcessHandler(ies domain.IImageEditService) *ProcessHandler {
-	return &ProcessHandler{imageEditService: ies}
+func NewProcessHandler(ies domain.IImageEditService, tgs domain.ITextGenerateService, sh domain.IStorageHandler) *ProcessHandler {
+	return &ProcessHandler{services: usecase.Services{ImageEditService: ies, TextGenerateService: tgs}, storage: sh}
 }
 
 func (ph *ProcessHandler) Process(c *gin.Context) {
@@ -36,7 +37,7 @@ func (ph *ProcessHandler) Process(c *gin.Context) {
 	}
 	defer file.Close()
 
-	u := usecase.NewProcessUsecase(ph.imageEditService)
+	u := usecase.NewProcessUsecase(ph.services, ph.storage)
 	imageDataURL, post, err := u.Process(file, content)
 	if err != nil {
 		utils.RespondError(c, http.StatusInternalServerError, "画像抽出に失敗しました", err)

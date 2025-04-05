@@ -7,7 +7,13 @@ import (
 )
 
 type ProcessUsecase struct {
-	imageEditService domain.IImageEditService
+	services Services
+	storage  domain.IStorageHandler
+}
+
+type Services struct {
+	ImageEditService    domain.IImageEditService
+	TextGenerateService domain.ITextGenerateService
 }
 
 type Contents struct {
@@ -17,8 +23,8 @@ type Contents struct {
 	TryCount uint   `form:"tryCount"`
 }
 
-func NewProcessUsecase(ies domain.IImageEditService) *ProcessUsecase {
-	return &ProcessUsecase{imageEditService: ies}
+func NewProcessUsecase(srv Services, sh domain.IStorageHandler) *ProcessUsecase {
+	return &ProcessUsecase{services: srv, storage: sh}
 }
 
 func (pu *ProcessUsecase) Process(file multipart.File, content Contents) (string, string, error) {
@@ -29,13 +35,19 @@ func (pu *ProcessUsecase) Process(file multipart.File, content Contents) (string
 	}
 
 	// AIサービスにリクエスト
-	imageDataURL, err := pu.imageEditService.Extraction(imageBytes)
+	imageDataURL, err := pu.services.ImageEditService.Extraction(imageBytes)
 	if err != nil {
 		return "", "", err
 	}
 
-	// 投稿文生成処理
-	postText := "投稿文"
+	// 画像を保存
+	pu.storage.UploadImage(file, "file_name", "image")
+
+	// 投稿文生成処理\
+	postText, err := pu.services.TextGenerateService.Generate(content.Grade)
+	if err != nil {
+		return "", "", err
+	}
 
 	// レスポンス出力
 	return imageDataURL, postText, nil
