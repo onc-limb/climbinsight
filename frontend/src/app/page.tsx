@@ -55,10 +55,9 @@ export default function TopPage() {
       }
 
       const data = await res.json();
-      console.log("🧠 AI Response:", data);
       
       // zustand に保存して遷移
-      useResultStore.getState().setResult(data.imageData, data.caption);
+      useResultStore.getState().setResult(data.imageData, data.content);
       router.push('/result');
     } catch (err) {
       setError((err as Error).message);

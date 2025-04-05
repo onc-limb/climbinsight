@@ -2,11 +2,10 @@
 
 import { useResultStore } from '@/stores/resultStore';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function ResultPage() {
-  const { imageData, caption, clear } = useResultStore();
-  const router = useRouter();
+  const { imageData, content } = useResultStore();
 
   if (!imageData) return <p>データが見つかりません。</p>;
 
@@ -25,27 +24,35 @@ export default function ResultPage() {
         画像をダウンロード
       </a>
 
-      <div className="bg-orange-100 p-4 rounded">
-        <p className="text-sm whitespace-pre-line">{caption}</p>
+      <div className="p-4 rounded">
+        <p className="text-sm whitespace-pre-line bg-orange-50 border-4 border-orange-300 p-4 rounded-lg">{content}</p>
         <button
           onClick={() => {
-            navigator.clipboard.writeText(caption ?? '');
+            navigator.clipboard.writeText(content ?? '');
+            const toast = document.createElement('div');
+            toast.textContent = 'コピーしました';
+            toast.style.position = 'fixed';
+            toast.style.bottom = '10px';
+            toast.style.right = '10px';
+            toast.style.backgroundColor = 'orange';
+            toast.style.color = 'white';
+            toast.style.padding = '10px';
+            toast.style.borderRadius = '5px';
+            toast.style.zIndex = '1000';
+            document.body.appendChild(toast);
+            setTimeout(() => {
+              document.body.removeChild(toast);
+            }, 2000);
           }}
-          className="mt-2 text-sm underline text-orange-700"
+          className="text-sm text-orange-700 hover:text-orange-900 border border-orange-700 rounded px-3 py-1 hover:shadow-lg"
         >
           投稿文をコピー
         </button>
       </div>
 
-      <button
-        onClick={() => {
-          clear();
-          router.push('/');
-        }}
-        className="text-sm text-gray-600 underline text-center block mx-auto"
-      >
-        トップページへ戻る
-      </button>
+      <Link href="/" className="text-sm text-orange-700 hover:text-orange-900 border border-orange-700 rounded px-3 py-1 hover:shadow-lg">
+          トップページへ戻る
+      </Link>
     </main>
   );
 }
