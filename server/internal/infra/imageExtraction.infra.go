@@ -2,7 +2,6 @@ package infra
 
 import (
 	pb "climbinsight/server/ai"
-	"climbinsight/server/internal/domain"
 	"context"
 	"encoding/base64"
 	"fmt"
@@ -12,15 +11,15 @@ import (
 	"google.golang.org/grpc"
 )
 
-type AiService struct {
-	client domain.AiClient
+type ImageEditService struct {
+	client pb.AIServiceClient
 }
 
-func NewAIService(conn *grpc.ClientConn) *AiService {
-	return &AiService{client: pb.NewAIServiceClient(conn)}
+func NewImageEditService(conn *grpc.ClientConn) *ImageEditService {
+	return &ImageEditService{client: pb.NewAIServiceClient(conn)}
 }
 
-func (as *AiService) ImageExtraction(image []byte) (string, error) {
+func (ies *ImageEditService) ImageExtraction(image []byte) (string, error) {
 	// リクエスト構築
 	imageBase64 := base64.StdEncoding.EncodeToString(image)
 	mimeType := http.DetectContentType(image)
@@ -34,7 +33,7 @@ func (as *AiService) ImageExtraction(image []byte) (string, error) {
 	defer cancel()
 
 	// RPC 呼び出し
-	_, err := as.client.Process(ctx, input)
+	_, err := ies.client.Process(ctx, input)
 	if err != nil {
 		return "", err
 	}

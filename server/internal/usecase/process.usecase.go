@@ -7,7 +7,7 @@ import (
 )
 
 type ProcessUsecase struct {
-	aiService domain.IAiService
+	imageEditService domain.IImageEditService
 }
 
 type Contents struct {
@@ -17,8 +17,8 @@ type Contents struct {
 	TryCount uint   `form:"tryCount"`
 }
 
-func NewProcessUsecase(as domain.IAiService) *ProcessUsecase {
-	return &ProcessUsecase{aiService: as}
+func NewProcessUsecase(ies domain.IImageEditService) *ProcessUsecase {
+	return &ProcessUsecase{imageEditService: ies}
 }
 
 func (pu *ProcessUsecase) Process(file multipart.File, content Contents) (string, string, error) {
@@ -28,13 +28,8 @@ func (pu *ProcessUsecase) Process(file multipart.File, content Contents) (string
 		return "", "", err
 	}
 
-	// 画像URL作成
-	// imageBase64 := base64.StdEncoding.EncodeToString(imageBytes)
-	// mimeType := http.DetectContentType(imageBytes)
-	// imageDataURL := fmt.Sprintf("data:%s;base64,%s", mimeType, imageBase64)
-
 	// AIサービスにリクエスト
-	imageDataURL, err := pu.aiService.ImageExtraction(imageBytes)
+	imageDataURL, err := pu.imageEditService.Extraction(imageBytes)
 	if err != nil {
 		return "", "", err
 	}
