@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
@@ -24,19 +25,20 @@ func NewStorageHandler() (*StorageHandler, error) {
 	secretKey := os.Getenv("STORAGE_SECRET_KEY")
 	region := os.Getenv("STORAGE_REGION")
 
-	cfg := aws.Config{
-		Region:      region,
-		Credentials: aws.NewCredentialsCache(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")),
-		EndpointResolverWithOptions: aws.EndpointResolverWithOptionsFunc(
-			func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-				return aws.Endpoint{
-					URL:           endpoint,
-					SigningRegion: region,
-				}, nil
-			}),
+	cfg, err := config.LoadDefaultConfig(context.Background(),
+		config.WithRegion(region),
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")),
+	)
+	if err != nil {
+		fmt.Println("Couldn't load default configuration. Have you set up your AWS account?")
+		fmt.Println(err)
+		return nil, err
 	}
 
-	client := s3.NewFromConfig(cfg)
+	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
+		o.UsePathStyle = true
+		o.BaseEndpoint = aws.String(endpoint)
+	})
 
 	return &StorageHandler{
 		Client:     client,
@@ -45,11 +47,11 @@ func NewStorageHandler() (*StorageHandler, error) {
 }
 
 // UploadImage は画像ファイルをS3互換バケットにアップロードします
-func (u *StorageHandler) UploadImage(file multipart.File, fileName string, contentType string) error {
+func (sh *StorageHandler) UploadImage(file multipart.File, fileName string, contentType string) error {
 	defer file.Close()
 
-	_, err := u.Client.PutObject(context.TODO(), &s3.PutObjectInput{
-		Bucket:      aws.String(u.BucketName),
+	_, err := sh.Client.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket:      aws.String(sh.BucketName),
 		Key:         aws.String(fileName),
 		Body:        file,
 		ContentType: aws.String(contentType),
@@ -59,6 +61,6 @@ func (u *StorageHandler) UploadImage(file multipart.File, fileName string, conte
 		return err
 	}
 
-	fmt.Printf("✅ Upload succeeded: %s/%s\n", u.BucketName, fileName)
+	fmt.Printf("✅ Upload succeeded: %s/%s\n", sh.BucketName, fileName)
 	return nil
 }

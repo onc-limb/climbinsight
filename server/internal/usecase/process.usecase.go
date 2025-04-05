@@ -41,7 +41,7 @@ func (pu *ProcessUsecase) Process(file multipart.File, content Contents) (string
 	}
 
 	// 画像を保存
-	pu.storage.UploadImage(file, "file_name", "image")
+	pu.storage.UploadImage(file, "file_name", "image/jpeg")
 
 	// 投稿文生成処理\
 	postText, err := pu.services.TextGenerateService.Generate(content.Grade)
