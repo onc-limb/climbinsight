@@ -1,12 +1,7 @@
 package main
 
 import (
-	"encoding/base64"
-	"fmt"
-	"io"
 	"log"
-	"net/http"
-	"strconv"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -14,14 +9,9 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	pb "climbinsight/server/ai"
+	"climbinsight/server/internal/infra"
+	"climbinsight/server/internal/presentation"
 )
-
-type Contents struct {
-	Grade    string `form:"grade"`
-	Gym      string `form:"gym"`
-	Style    string `form:"style"`
-	TryCount uint   `form:"tryCount"`
-}
 
 type Client struct {
 	AiClient pb.AIServiceClient
@@ -34,10 +24,10 @@ func main() {
 	}
 	defer conn.Close()
 
-	// クライアントの作成
-	client := &Client{
-		AiClient: pb.NewAIServiceClient(conn),
-	}
+	// AIサービスの作成
+	as := infra.NewAIService(conn)
+
+	ph := presentation.NewProcessHandler(as)
 
 	r := gin.Default()
 
@@ -50,57 +40,57 @@ func main() {
 		})
 	})
 
-	r.POST("/process", client.process)
+	r.POST("/process", ph.Process)
 
 	r.Run(":8080")
 }
 
-func (client *Client) process(c *gin.Context) {
-	// 画像ファイルを受け取る
-	handler, err := c.FormFile("image")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "画像のアップロードに失敗しました"})
-		return
-	}
-	file, err := handler.Open()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "ファイルが開けませんでした"})
-		return
-	}
-	defer file.Close()
+// func (client *Client) process(c *gin.Context) {
+// 	// 画像ファイルを受け取る
+// 	handler, err := c.FormFile("image")
+// 	if err != nil {
+// 		utils.RespondError(c, http.StatusBadRequest, "画像のアップロードに失敗しました", err)
+// 		return
+// 	}
+// 	file, err := handler.Open()
+// 	if err != nil {
+// 		utils.RespondError(c, http.StatusInternalServerError, "ファイルが開けませんでした", err)
+// 		return
+// 	}
+// 	defer file.Close()
 
-	imageBytes, err := io.ReadAll(file)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "ファイルの読み込みに失敗しました"})
-		return
-	}
-	imageBase64 := base64.StdEncoding.EncodeToString(imageBytes)
-	mimeType := http.DetectContentType(imageBytes)
-	imageDataURL := fmt.Sprintf("data:%s;base64,%s", mimeType, imageBase64)
+// 	imageBytes, err := io.ReadAll(file)
+// 	if err != nil {
+// 		utils.RespondError(c, http.StatusInternalServerError, "ファイルの読み込みに失敗しました", err)
+// 		return
+// 	}
+// 	imageBase64 := base64.StdEncoding.EncodeToString(imageBytes)
+// 	mimeType := http.DetectContentType(imageBytes)
+// 	imageDataURL := fmt.Sprintf("data:%s;base64,%s", mimeType, imageBase64)
 
-	var content Contents
-	if err := c.Bind(&content); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
-		return
-	}
-	// リクエスト構築
-	// input := &pb.InputRequest{
-	// 	Input: string(imageBytes),
-	// }
+// 	var content Contents
+// 	if err := c.Bind(&content); err != nil {
+// 		utils.RespondError(c, http.StatusBadRequest, "Invalid input", err)
+// 		return
+// 	}
+// 	// リクエスト構築
+// 	input := &pb.InputRequest{
+// 		Input: string(imageBytes),
+// 	}
 
-	// // タイムアウト付きコンテキスト
-	// ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	// defer cancel()
+// 	// タイムアウト付きコンテキスト
+// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+// 	defer cancel()
 
-	// // RPC 呼び出し
-	// res, err := client.AiClient.Process(ctx, input)
-	// if err != nil {
-	// 	log.Fatalf("❌ 呼び出し失敗: %v", err)
-	// }
+// 	// RPC 呼び出し
+// 	res, err := client.AiClient.Process(ctx, input)
+// 	if err != nil {
+// 		log.Fatalf("❌ 呼び出し失敗: %v", err)
+// 	}
 
-	// レスポンス出力
-	c.JSON(http.StatusOK, gin.H{
-		"imageData": imageDataURL,
-		"content":   content.Grade + " : " + content.Gym + " : " + content.Style + " : " + strconv.Itoa(int(content.TryCount)) + ";",
-	})
-}
+// 	// レスポンス出力
+// 	c.JSON(http.StatusOK, gin.H{
+// 		"imageData": imageDataURL,
+// 		"content":   content.Grade + " : " + content.Gym + " : " + content.Style + " : " + strconv.Itoa(int(content.TryCount)) + ";",
+// 	})
+// }
