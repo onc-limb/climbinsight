@@ -20,14 +20,9 @@ func NewProcessHandler(ies domain.IImageEditService, tgs domain.ITextGenerateSer
 
 func (ph *ProcessHandler) Process(c *gin.Context) {
 	// 画像ファイルを受け取る
-	handler, err := c.FormFile("image")
+	fh, err := c.FormFile("image")
 	if err != nil {
 		utils.RespondError(c, http.StatusBadRequest, "画像のアップロードに失敗しました", err)
-		return
-	}
-	file, err := handler.Open()
-	if err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, "ファイルが開けませんでした", err)
 		return
 	}
 	var content usecase.Contents
@@ -35,10 +30,9 @@ func (ph *ProcessHandler) Process(c *gin.Context) {
 		utils.RespondError(c, http.StatusBadRequest, "Invalid input", err)
 		return
 	}
-	defer file.Close()
 
 	u := usecase.NewProcessUsecase(ph.services, ph.storage)
-	imageDataURL, post, err := u.Process(file, content)
+	imageDataURL, post, err := u.Process(fh, content)
 	if err != nil {
 		utils.RespondError(c, http.StatusInternalServerError, "画像抽出に失敗しました", err)
 		return

@@ -48,7 +48,7 @@ func NewStorageHandler() (*StorageHandler, error) {
 
 // UploadImage は画像ファイルをS3互換バケットにアップロードします
 func (sh *StorageHandler) UploadImage(file multipart.File, fileName string, contentType string) error {
-	defer file.Close()
+	file.Seek(0, 0)
 
 	_, err := sh.Client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket:      aws.String(sh.BucketName),
