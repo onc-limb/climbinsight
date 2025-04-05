@@ -44,7 +44,6 @@ export default function TopPage() {
     formData.append("style", style);
 
     try {
-        console.log("ここを確認：", process.env.NEXT_PUBLIC_API_URL)
         const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/process", {
         method: "POST",
         body: formData,

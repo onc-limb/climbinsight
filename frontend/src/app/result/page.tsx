@@ -7,11 +7,9 @@ import Link from 'next/link';
 export default function ResultPage() {
   const { imageData, content } = useResultStore();
 
-  if (!imageData) return <p>データが見つかりません。</p>;
-
   return (
     <main className="max-w-xl mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-center">処理結果</h1>
+      { imageData && (<><h1 className="text-2xl font-bold text-center">処理結果</h1>
 
       <Image src={imageData} alt="Result" width={500}
         height={400} className="w-full rounded-lg shadow" />
@@ -48,7 +46,7 @@ export default function ResultPage() {
         >
           投稿文をコピー
         </button>
-      </div>
+      </div></>)}
 
       <Link href="/" className="text-sm text-orange-700 hover:text-orange-900 border border-orange-700 rounded px-3 py-1 hover:shadow-lg">
           トップページへ戻る
