@@ -25,9 +25,9 @@ func main() {
 	defer conn.Close()
 
 	// AIサービスの作成
-	as := infra.NewAIService(conn)
+	ies := infra.NewImageEditService(conn)
 
-	ph := presentation.NewProcessHandler(as)
+	ph := presentation.NewProcessHandler(ies)
 
 	r := gin.Default()
 
