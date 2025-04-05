@@ -19,10 +19,10 @@ type StorageHandler struct {
 
 // NewS3Uploader は MinIO または R2 へのアップローダーを初期化します
 func NewStorageHandler() (*StorageHandler, error) {
-	endpoint := os.Getenv("S3_ENDPOINT")    // http://localhost:9000（MinIO） or https://xxx.r2.cloudflarestorage.com
-	accessKey := os.Getenv("S3_ACCESS_KEY") // minioadmin（ローカル） or Cloudflareのキー
-	secretKey := os.Getenv("S3_SECRET_KEY") // 同上
-	region := os.Getenv("S3_REGION")        // us-east-1 または auto（R2）
+	endpoint := os.Getenv("STORAGE_ENDPOINT")
+	accessKey := os.Getenv("STORAGE_ACCESS_KEY")
+	secretKey := os.Getenv("STORAGE_SECRET_KEY")
+	region := os.Getenv("STORAGE_REGION")
 
 	cfg := aws.Config{
 		Region:      region,
@@ -40,7 +40,7 @@ func NewStorageHandler() (*StorageHandler, error) {
 
 	return &StorageHandler{
 		Client:     client,
-		BucketName: os.Getenv("S3_BUCKET_NAME"), // 例: "test-bucket"
+		BucketName: os.Getenv("STORAGE_BUCKET_NAME"),
 	}, nil
 }
 
