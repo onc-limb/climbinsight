@@ -3,8 +3,8 @@ package infra
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
-	"mime/multipart"
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -47,12 +47,11 @@ func NewStorageHandler() (*StorageHandler, error) {
 }
 
 // UploadImage は画像ファイルをS3互換バケットにアップロードします
-func (sh *StorageHandler) UploadImage(file *multipart.File, fileName string, contentType string) error {
-	(*file).Seek(0, 0)
+func (sh *StorageHandler) UploadImage(file io.Reader, fileName string, contentType string) error {
 	_, err := sh.Client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket:      aws.String(sh.BucketName),
 		Key:         aws.String(fileName),
-		Body:        *file,
+		Body:        file,
 		ContentType: aws.String(contentType),
 	})
 	if err != nil {

@@ -1,7 +1,7 @@
 package domain
 
-import "mime/multipart"
+import "io"
 
 type IStorageHandler interface {
-	UploadImage(*multipart.File, string, string) error
+	UploadImage(io.Reader, string, string) error
 }

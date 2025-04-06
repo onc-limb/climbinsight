@@ -1,9 +1,8 @@
 package usecase
 
 import (
+	"bytes"
 	"climbinsight/server/internal/domain"
-	"io"
-	"mime/multipart"
 )
 
 type ProcessUsecase struct {
@@ -23,30 +22,26 @@ type Contents struct {
 	TryCount uint   `form:"tryCount"`
 }
 
+type UploadFile struct {
+	FileName    string
+	ContentType string
+	Data        *[]byte
+}
+
 func NewProcessUsecase(srv Services, sh domain.IStorageHandler) *ProcessUsecase {
 	return &ProcessUsecase{services: srv, storage: sh}
 }
 
-func (pu *ProcessUsecase) Process(fh *multipart.FileHeader, content Contents) (string, string, error) {
-	file, err := fh.Open()
-	if err != nil {
-		return "", "", err
-	}
-	defer file.Close()
-
-	imageBytes, err := io.ReadAll(file)
-	if err != nil {
-		return "", "", err
-	}
+func (pu *ProcessUsecase) Process(file *UploadFile, content Contents) (string, string, error) {
 
 	// AIサービスにリクエスト
-	imageDataURL, err := pu.services.ImageEditService.Extraction(imageBytes)
+	imageDataURL, err := pu.services.ImageEditService.Extraction(*file.Data)
 	if err != nil {
 		return "", "", err
 	}
 
 	// 画像を保存
-	pu.storage.UploadImage(&file, fh.Filename, fh.Header.Get("Content-Type"))
+	pu.storage.UploadImage(bytes.NewReader(*file.Data), file.FileName, file.ContentType)
 
 	// 投稿文生成処理\
 	postText, err := pu.services.TextGenerateService.Generate(content.Grade)
