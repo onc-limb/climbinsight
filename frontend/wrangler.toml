@@ -1,0 +1,10 @@
+name = "climbinsight"
+compatibility_date = "2024-04-06"
+compatibility_flags = [ "nodejs_compat" ]
+
+[pages]
+project = "climbinsight"                   # Cloudflare Pages のプロジェクト名と一致させる
+build_output_dir = ".vercel/output/static" # ビルドで出力された静的ファイルのパス
+
+[build]
+command = "npx @cloudflare/next-on-pages"
