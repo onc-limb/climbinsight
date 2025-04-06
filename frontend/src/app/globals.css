@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+:root {
+  --background: #FFF7ED; /* 明るめのグレー */
+  --foreground: #1f2937; /* ダークグレー（文字色） */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+}
