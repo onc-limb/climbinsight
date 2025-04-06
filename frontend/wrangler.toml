@@ -1,5 +1,6 @@
 name = "climbinsight"
-compatibility_date = "2024-04-06"
+compatibility_flags = [ "nodejs_compat" ]
+compatibility_date = "2024-09-23"
 
 [pages]
 project = "climbinsight"                   # Cloudflare Pages のプロジェクト名と一致させる
