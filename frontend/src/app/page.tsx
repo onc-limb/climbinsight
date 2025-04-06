@@ -50,7 +50,7 @@ export default function TopPage() {
       });
 
       if (!res.ok) {
-        throw new Error("AIサーバーとの通信に失敗しました。");
+        throw new Error("サーバーとの通信に失敗しました。");
       }
 
       const data = await res.json();
