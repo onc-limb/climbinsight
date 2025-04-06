@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -61,4 +62,22 @@ func (sh *StorageHandler) UploadImage(file io.Reader, fileName string, contentTy
 
 	fmt.Printf("✅ Upload succeeded: %s/%s\n", sh.BucketName, fileName)
 	return nil
+}
+
+func (sh *StorageHandler) GeneratePresignedGetURL(fileName string, contentType string) (string, error) {
+	req := &s3.GetObjectInput{
+		Bucket:              aws.String(sh.BucketName),
+		Key:                 aws.String(fileName),
+		ResponseContentType: aws.String(contentType),
+	}
+
+	presignClient := s3.NewPresignClient(sh.Client)
+
+	presigned, err := presignClient.PresignGetObject(context.TODO(), req, func(opts *s3.PresignOptions) {
+		opts.Expires = time.Minute * 30
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to presign GET: %w", err)
+	}
+	return presigned.URL, nil
 }

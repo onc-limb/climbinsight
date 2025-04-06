@@ -35,13 +35,20 @@ func NewProcessUsecase(srv Services, sh domain.IStorageHandler) *ProcessUsecase 
 func (pu *ProcessUsecase) Process(file *UploadFile, content Contents) (string, string, error) {
 
 	// AIサービスにリクエスト
-	imageDataURL, err := pu.services.ImageEditService.Extraction(*file.Data)
+	_, err := pu.services.ImageEditService.Extraction(*file.Data)
 	if err != nil {
 		return "", "", err
 	}
 
 	// 画像を保存
-	pu.storage.UploadImage(bytes.NewReader(*file.Data), file.FileName, file.ContentType)
+	if err := pu.storage.UploadImage(bytes.NewReader(*file.Data), file.FileName, file.ContentType); err != nil {
+		return "", "", err
+	}
+
+	url, err := pu.storage.GeneratePresignedGetURL(file.FileName, file.ContentType)
+	if err != nil {
+		return "", "", err
+	}
 
 	// 投稿文生成処理\
 	postText, err := pu.services.TextGenerateService.Generate(content.Grade)
@@ -50,5 +57,5 @@ func (pu *ProcessUsecase) Process(file *UploadFile, content Contents) (string, s
 	}
 
 	// レスポンス出力
-	return imageDataURL, postText, nil
+	return url, postText, nil
 }
