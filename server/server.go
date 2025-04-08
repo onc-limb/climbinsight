@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"os"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -41,7 +43,13 @@ func main() {
 	r := gin.Default()
 
 	// fixme: デプロイ前に詳細を設定する
-	r.Use(cors.Default())
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{os.Getenv("ALLOWED_ORIGIN")},
+		AllowMethods:     []string{"GET", "POST", "OPTION"},
+		AllowHeaders:     []string{"Content-Type"},
+		AllowCredentials: false,
+		MaxAge:           24 * time.Hour,
+	}))
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
