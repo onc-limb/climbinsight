@@ -20,11 +20,15 @@ type Client struct {
 	AiClient pb.AIServiceClient
 }
 
-func main() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatalf("❌ 環境変数取得に失敗: %v", err)
+func init() {
+	if os.Getenv("ENV") == "" {
+		if err := godotenv.Load(".env"); err != nil {
+			log.Fatalf("❌ 環境変数取得に失敗: %v", err)
+		}
 	}
+}
+
+func main() {
 	conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("❌ 接続に失敗: %v", err)
