@@ -1,5 +1,5 @@
 package domain
 
 type ITextGenerateService interface {
-	Generate(string) (string, error)
+	Generate(grade, gym, style string, tryCount uint) (string, error)
 }

@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/cohesion-org/deepseek-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -12,12 +13,19 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	pb "climbinsight/server/ai"
+	"climbinsight/server/internal/domain"
 	"climbinsight/server/internal/infra"
 	"climbinsight/server/internal/presentation"
 )
 
 type Client struct {
 	AiClient pb.AIServiceClient
+}
+
+type dummyService struct{}
+
+func (d dummyService) Generate(grade, gym, style string, tryCount uint) (string, error) {
+	return "ローカル環境で実行しました。", nil
 }
 
 func init() {
@@ -38,11 +46,17 @@ func main() {
 	// AIサービスの作成
 	ies := infra.NewImageEditService(conn)
 
-	tgs := infra.NewTextGenerateService()
+	// 生成AIサービスの作成
+	var tgs any
+	if os.Getenv("ENV") == "prd" {
+		tgs = infra.NewTextGenerateService(deepseek.NewClient(os.Getenv("DEEPSEEK_API_KEY")))
+	} else {
+		tgs = dummyService{}
+	}
 
 	sh, _ := infra.NewStorageHandler()
 
-	ph := presentation.NewProcessHandler(ies, tgs, sh)
+	ph := presentation.NewProcessHandler(ies, tgs.(domain.ITextGenerateService), sh)
 
 	r := gin.Default()
 
