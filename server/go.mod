@@ -10,6 +10,7 @@ require (
 	github.com/cohesion-org/deepseek-go v1.2.10
 	github.com/gin-contrib/cors v1.7.4
 	github.com/gin-gonic/gin v1.10.0
+	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	google.golang.org/grpc v1.71.0
 	google.golang.org/protobuf v1.36.5

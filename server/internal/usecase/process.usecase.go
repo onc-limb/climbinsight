@@ -3,6 +3,10 @@ package usecase
 import (
 	"bytes"
 	"climbinsight/server/internal/domain"
+	"fmt"
+	"path/filepath"
+
+	"github.com/google/uuid"
 )
 
 type ProcessUsecase struct {
@@ -33,6 +37,12 @@ func NewProcessUsecase(srv Services, sh domain.IStorageHandler) *ProcessUsecase 
 }
 
 func (pu *ProcessUsecase) Process(file *UploadFile, content Contents) (string, string, error) {
+	// 画像を保存
+	imageId := uuid.New().String()
+	originName := fmt.Sprintf("original/%s.%s", imageId, filepath.Ext(file.FileName))
+	if err := pu.storage.UploadImage(bytes.NewReader(*file.Data), originName, file.ContentType); err != nil {
+		return "", "", err
+	}
 
 	// AIサービスにリクエスト
 	_, err := pu.services.ImageEditService.Extraction(*file.Data)
@@ -40,12 +50,7 @@ func (pu *ProcessUsecase) Process(file *UploadFile, content Contents) (string, s
 		return "", "", err
 	}
 
-	// 画像を保存
-	if err := pu.storage.UploadImage(bytes.NewReader(*file.Data), file.FileName, file.ContentType); err != nil {
-		return "", "", err
-	}
-
-	url, err := pu.storage.GeneratePresignedGetURL(file.FileName, file.ContentType)
+	url, err := pu.storage.GeneratePresignedGetURL(originName, file.ContentType)
 	if err != nil {
 		return "", "", err
 	}
