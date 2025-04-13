@@ -19,7 +19,7 @@ func NewImageEditService(conn *grpc.ClientConn) *ImageEditService {
 	return &ImageEditService{client: pb.NewAIServiceClient(conn)}
 }
 
-func (ies *ImageEditService) Extraction(image []byte) (string, error) {
+func (ies *ImageEditService) Extraction(image []byte, content) (string, error) {
 	// リクエスト構築
 	imageBase64 := base64.StdEncoding.EncodeToString(image)
 	mimeType := http.DetectContentType(image)

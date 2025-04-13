@@ -7,15 +7,16 @@ option go_package = "climbinsight/server/ai;ai";
 // サービス定義：AIService という名前のサービスを定義する
 service AIService {
   // Process メソッドを定義する。リクエストを受けてレスポンスを返す。
-  rpc Process(InputRequest) returns (OutputResponse);
+  rpc Process(InputRequest) returns (ProcessImageResponse);
 }
 
 // クライアントから送られてくるリクエストデータ
 message InputRequest {
-  string input = 1; // フィールド名: input（1番目）
+  bytes input = 1; // フィールド名: input（1番目）
 }
 
 // サーバーが返すレスポンスデータ
-message OutputResponse {
-  string output = 1; // フィールド名: output（1番目）
+message ProcessImageResponse {
+  bytes processed_image = 1; // RGBA PNG画像
+  string mime_type = 2;      // "image/png"
 }

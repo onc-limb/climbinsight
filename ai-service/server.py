@@ -5,11 +5,19 @@ import time
 import ai_pb2
 import ai_pb2_grpc
 
+from sam import load_sam_model, process_image_bytes
+
 class AIService(ai_pb2_grpc.AIServiceServicer):
+    def __init__(self):
+        print("🧠 SAM モデルをロード中...")
+        self.gen = load_sam_model()
+        print("✅ モデル準備完了")
+
     def Process(self, request, context):
-        input_text = request.input
-        print(f"📥 受信: {input_text}")
-        return ai_pb2.OutputResponse(output=f"AI says: {input_text}")
+        print(f"📥 受信")
+        result_bytes = process_image_bytes(request.input, self.gen)
+        print(f"処理完了")
+        return ai_pb2.OutputResponse(processed_image=result_bytes, mime_type="image/png")
     
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

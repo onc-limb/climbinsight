@@ -45,7 +45,7 @@ func (pu *ProcessUsecase) Process(file *UploadFile, content Contents) (string, s
 	}
 
 	// AIサービスにリクエスト
-	_, err := pu.services.ImageEditService.Extraction(*file.Data)
+	_, err := pu.services.ImageEditService.Extraction(*file.Data, file.ContentType)
 	if err != nil {
 		return "", "", err
 	}

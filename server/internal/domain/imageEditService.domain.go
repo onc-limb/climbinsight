@@ -1,5 +1,5 @@
 package domain
 
 type IImageEditService interface {
-	Extraction([]byte) (string, error)
+	Extraction([]byte, string) (string, error)
 }
