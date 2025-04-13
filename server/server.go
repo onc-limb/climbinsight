@@ -18,6 +18,8 @@ import (
 	"climbinsight/server/internal/presentation"
 )
 
+const maxMsgSize = 20 * 1024 * 1024 // 20MB
+
 type Client struct {
 	AiClient pb.AIServiceClient
 }
@@ -37,7 +39,12 @@ func init() {
 }
 
 func main() {
-	conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("localhost:50051",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(
+			grpc.MaxCallRecvMsgSize(maxMsgSize),
+			grpc.MaxCallSendMsgSize(maxMsgSize),
+		))
 	if err != nil {
 		log.Fatalf("❌ 接続に失敗: %v", err)
 	}

@@ -7,6 +7,8 @@ import ai_pb2_grpc
 
 from sam import load_sam_model, process_image_bytes
 
+MAX_MESSAGE_LENGTH = 20 * 1024 * 1024  # 20MB に増やすなど
+
 class AIService(ai_pb2_grpc.AIServiceServicer):
     def __init__(self):
         print("🧠 SAM モデルをロード中...")
@@ -17,10 +19,13 @@ class AIService(ai_pb2_grpc.AIServiceServicer):
         print(f"📥 受信")
         result_bytes = process_image_bytes(request.input, self.gen)
         print(f"処理完了")
-        return ai_pb2.OutputResponse(processed_image=result_bytes, mime_type="image/png")
+        return ai_pb2.ProcessImageResponse(processed_image=result_bytes, mime_type="image/png")
     
 def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
+                         options=[
+                             ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+                             ("grpc.max_send_message_length", MAX_MESSAGE_LENGTH)])
     ai_pb2_grpc.add_AIServiceServicer_to_server(AIService(), server)
 
     port = 50051
