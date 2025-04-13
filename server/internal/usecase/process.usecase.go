@@ -50,7 +50,7 @@ func (pu *ProcessUsecase) Process(file *UploadFile, content Contents) (string, s
 		return "", "", err
 	}
 
-	// 投稿文生成処理\
+	// 投稿文生成処理
 	postText, err := pu.services.TextGenerateService.Generate(content.Grade, content.Gym, content.Style, content.TryCount)
 	if err != nil {
 		return "", "", err
