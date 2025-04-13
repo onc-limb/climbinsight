@@ -29,7 +29,7 @@ const (
 // サービス定義：AIService という名前のサービスを定義する
 type AIServiceClient interface {
 	// Process メソッドを定義する。リクエストを受けてレスポンスを返す。
-	Process(ctx context.Context, in *InputRequest, opts ...grpc.CallOption) (*OutputResponse, error)
+	Process(ctx context.Context, in *InputRequest, opts ...grpc.CallOption) (*ProcessImageResponse, error)
 }
 
 type aIServiceClient struct {
@@ -40,9 +40,9 @@ func NewAIServiceClient(cc grpc.ClientConnInterface) AIServiceClient {
 	return &aIServiceClient{cc}
 }
 
-func (c *aIServiceClient) Process(ctx context.Context, in *InputRequest, opts ...grpc.CallOption) (*OutputResponse, error) {
+func (c *aIServiceClient) Process(ctx context.Context, in *InputRequest, opts ...grpc.CallOption) (*ProcessImageResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(OutputResponse)
+	out := new(ProcessImageResponse)
 	err := c.cc.Invoke(ctx, AIService_Process_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (c *aIServiceClient) Process(ctx context.Context, in *InputRequest, opts ..
 // サービス定義：AIService という名前のサービスを定義する
 type AIServiceServer interface {
 	// Process メソッドを定義する。リクエストを受けてレスポンスを返す。
-	Process(context.Context, *InputRequest) (*OutputResponse, error)
+	Process(context.Context, *InputRequest) (*ProcessImageResponse, error)
 	mustEmbedUnimplementedAIServiceServer()
 }
 
@@ -68,7 +68,7 @@ type AIServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedAIServiceServer struct{}
 
-func (UnimplementedAIServiceServer) Process(context.Context, *InputRequest) (*OutputResponse, error) {
+func (UnimplementedAIServiceServer) Process(context.Context, *InputRequest) (*ProcessImageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Process not implemented")
 }
 func (UnimplementedAIServiceServer) mustEmbedUnimplementedAIServiceServer() {}
