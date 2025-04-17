@@ -2,6 +2,7 @@ package infra
 
 import (
 	pb "climbinsight/server/ai"
+	"climbinsight/server/internal/domain"
 	"context"
 	"time"
 
@@ -16,10 +17,11 @@ func NewImageEditService(conn *grpc.ClientConn) *ImageEditService {
 	return &ImageEditService{client: pb.NewAIServiceClient(conn)}
 }
 
-func (ies *ImageEditService) Extraction(image []byte) ([]byte, error) {
+func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]byte, error) {
 	// リクエスト構築
 	input := &pb.InputRequest{
-		Input: image,
+		Image:  image,
+		Points: points,
 	}
 
 	// タイムアウト付きコンテキスト

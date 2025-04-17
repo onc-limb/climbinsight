@@ -12,7 +12,13 @@ service AIService {
 
 // クライアントから送られてくるリクエストデータ
 message InputRequest {
-  bytes input = 1; // フィールド名: input（1番目）
+  bytes image = 1; // フィールド名: input（1番目）
+  repeated Point points = 2;
+}
+
+message Point {
+  float x = 1;
+  float y = 2;
 }
 
 // サーバーが返すレスポンスデータ

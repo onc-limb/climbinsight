@@ -4,6 +4,7 @@ import (
 	"climbinsight/server/internal/domain"
 	"climbinsight/server/internal/usecase"
 	"climbinsight/server/utils"
+	"encoding/json"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -34,6 +35,14 @@ func (ph *ProcessHandler) Process(c *gin.Context) {
 		return
 	}
 
+	// 画像の座標を取得
+	pointsJson := c.PostForm("points")
+	var points []usecase.Point
+	if err := json.Unmarshal([]byte(pointsJson), &points); err != nil {
+		utils.RespondError(c, http.StatusBadRequest, "pointの読み込みに失敗しました", err)
+		return
+	}
+
 	var content usecase.Contents
 	if err := c.Bind(&content); err != nil {
 		utils.RespondError(c, http.StatusBadRequest, "コンテントの読み込みに失敗しました", err)
@@ -41,7 +50,7 @@ func (ph *ProcessHandler) Process(c *gin.Context) {
 	}
 
 	u := usecase.NewProcessUsecase(ph.services, ph.storage)
-	imageDataURL, post, err := u.Process(uploadFile, content)
+	imageDataURL, post, err := u.Process(uploadFile, points, content)
 	if err != nil {
 		utils.RespondError(c, http.StatusInternalServerError, "画像抽出に失敗しました", err)
 		return

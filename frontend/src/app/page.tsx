@@ -1,19 +1,38 @@
 'use client'
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useResultStore } from '@/stores/resultStore';
 import { useRouter } from 'next/navigation';
+
+type Point = { x: number; y: number }
 
 export default function TopPage() {
   const router = useRouter();
   const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const imageRef = useRef<HTMLImageElement>(null)
   const [grade, setGrade] = useState("V0");
   const [gym, setGym] = useState("");
   const [style, setStyle] = useState("");
   const [tryCount, setTryCount] = useState(0)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [points, setPoints] = useState<Point[]>([])
+
+  const handleClick = (e: React.MouseEvent<HTMLImageElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+
+    // すでに近くにあるなら削除（トグル）
+    const threshold = 10
+    const index = points.findIndex(p => Math.abs(p.x - x) < threshold && Math.abs(p.y - y) < threshold)
+
+    if (index !== -1) {
+      setPoints(prev => prev.filter((_, i) => i !== index))
+    } else {
+      setPoints(prev => [...prev, { x, y }])
+    }
+  }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -23,7 +42,6 @@ export default function TopPage() {
         return;
       }
       setImage(file);
-      setImagePreview(URL.createObjectURL(file));
       setError(null);
     }
   };
@@ -36,9 +54,15 @@ export default function TopPage() {
 
     setLoading(true);
     setError(null);
+    const rect = imageRef.current
+    const normalizedPoints =  points.map((p) => ({
+      x: p.x * ((rect?.naturalWidth || 1) / (rect?.width || 1)),
+      y: p.y * ((rect?.naturalHeight || 1) / (rect?.height || 1))
+    }))
 
     const formData = new FormData();
     formData.append("image", image);
+    formData.append("points", JSON.stringify(normalizedPoints))
     formData.append("grade", grade);
     formData.append("gym", gym);
     formData.append("style", style);
@@ -70,7 +94,7 @@ export default function TopPage() {
       <h1 className="text-2xl font-bold">ClimbInsight</h1>
       <p className="text-gray-600">課題の画像をアップロードして課題情報を記録しましょう！</p>
 
-      {!imagePreview ? (<div className="space-y-4">
+      {!image ? (<div className="space-y-4">
   <label
     htmlFor="file-upload"
     className="cursor-pointer flex flex-col items-center justify-center border-2 border-dashed border-orange-300 rounded-lg p-6 text-orange-700 hover:bg-orange-100 transition"
@@ -88,19 +112,27 @@ export default function TopPage() {
 </div>) : 
  (
     <div className="space-y-2">
+      <div className="relative inline-block">
       <Image
-        src={imagePreview}
+        ref={imageRef}
+        src={URL.createObjectURL(image)}
         alt="Preview"
         width={500}
         height={400}
+        onClick={handleClick}
         className="w-full rounded-lg shadow"
       />
+      <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
+        {points.map((point, idx) => (
+          <circle key={idx} cx={point.x} cy={point.y} r={8} fill="red" />
+        ))}
+      </svg>
+    </div>
       <div className="text-right">
         <button
           className="text-sm text-orange-700 hover:text-orange-900 border border-orange-700 rounded px-3 py-1 hover:shadow-lg"
           onClick={() => {
             setImage(null);
-            setImagePreview(null);
           }}
         >
           画像を取り消す
