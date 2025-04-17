@@ -5,19 +5,20 @@ import time
 import ai_pb2
 import ai_pb2_grpc
 
-from sam import load_sam_model, process_image_bytes
+from sam import load_sam_model, process_image_bytes, Coordinate
 
 MAX_MESSAGE_LENGTH = 20 * 1024 * 1024  # 20MB に増やすなど
 
 class AIService(ai_pb2_grpc.AIServiceServicer):
     def __init__(self):
         print("🧠 SAM モデルをロード中...")
-        self.gen = load_sam_model()
+        self.predictor = load_sam_model()
         print("✅ モデル準備完了")
 
     def Process(self, request, context):
         print(f"📥 受信")
-        result_bytes = process_image_bytes(request.input, self.gen, target_color=(255, 0, 0))
+        p = [Coordinate(x=p.x, y=p.y) for p in request.points]
+        result_bytes = process_image_bytes(request.image, p, self.predictor)
         print(f"処理完了")
         return ai_pb2.ProcessImageResponse(processed_image=result_bytes, mime_type="image/png")
     

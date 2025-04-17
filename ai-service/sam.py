@@ -1,8 +1,16 @@
+from dataclasses import dataclass
 from typing import List
 import cv2
 import numpy as np
 import torch
-from segment_anything import sam_model_registry, SamAutomaticMaskGenerator
+from segment_anything import sam_model_registry, SamPredictor
+from PIL import Image
+import io
+
+@dataclass
+class Coordinate:
+    x: float
+    y: float
 
 # モデル読み込み
 def load_sam_model():
@@ -10,54 +18,69 @@ def load_sam_model():
     model_type = "vit_b"
     sam = sam_model_registry[model_type](checkpoint=checkpoint)
     sam.to("cuda" if torch.cuda.is_available() else "cpu")
-    return SamAutomaticMaskGenerator(sam)
+    return SamPredictor(sam)
 
 # バイナリ画像 → numpy array (RGB)
 def decode_image(image_bytes: bytes) -> np.ndarray:
-    img_array = np.frombuffer(image_bytes, dtype=np.uint8)
-    image = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+    np_array = np.frombuffer(image_bytes, dtype=np.uint8)
+    image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
     return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-# numpy RGBA → PNGバイナリ
-def encode_image_to_png_bytes(image: np.ndarray) -> bytes:
-    # OpenCV は RGBA → BGRA 変換してからエンコードが必要
-    image_bgra = cv2.cvtColor(image, cv2.COLOR_RGBA2BGRA)
-    success, encoded = cv2.imencode(".png", image_bgra)
-    return encoded.tobytes()
+def apply_mask_to_image(image: np.ndarray, mask: np.ndarray) -> np.ndarray:
+    if mask.ndim == 3:
+        mask = mask[0]  # SAMからの出力が (1, H, W) の場合
+    alpha = (mask * 255).astype(np.uint8)
+    return np.dstack((image, alpha))  # RGB + Alpha
 
+def filter_largest_connected_component(mask: np.ndarray) -> np.ndarray:
+    # 入力: bool型mask (H, W)
+    mask_uint8 = (mask * 255).astype(np.uint8)
+    num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(mask_uint8)
 
-def extract_average_color(image: np.ndarray, mask: np.ndarray) -> np.ndarray:
-    # マスク領域の平均RGB色を取得
-    masked_pixels = image[mask.astype(bool)]
-    if masked_pixels.size == 0:
-        return np.array([0, 0, 0])
-    return masked_pixels.mean(axis=0)
+    if num_labels <= 1:
+        return mask  # 背景しかない
 
-def is_color_close(color1, color2, threshold=50) -> bool:
-    # ユークリッド距離で比較（近い色かどうか）
-    return np.linalg.norm(np.array(color1) - np.array(color2)) < threshold
+    # 面積最大のラベル（label 0は背景なので除く）
+    largest_label = 1 + np.argmax(stats[1:, cv2.CC_STAT_AREA])
+    return labels == largest_label
+
+def estimate_wall_color(image: np.ndarray) -> tuple[int, int, int]:
+    h, w, _ = image.shape
+    center_region = image[h//3:2*h//3, w//3:2*w//3]  # 中央1/3領域
+    avg_color = center_region.mean(axis=(0, 1)).astype(int)
+    return tuple(avg_color)  # (R, G, B)
+
+def encode_image(image: np.ndarray) -> bytes:
+    image_pil = Image.fromarray(image)
+    buffer = io.BytesIO()
+    image_pil.save(buffer, format="PNG")
+    return buffer.getvalue()
+
 
 # メイン処理（バイナリ入出力）
-def process_image_bytes(image_bytes: bytes, mask_generator: SamAutomaticMaskGenerator, target_color=(255, 0, 0)) -> bytes:
+def process_image_bytes(image_bytes: bytes, points: List[Coordinate], predictor: SamPredictor) -> bytes:
     image = decode_image(image_bytes)
-    masks = mask_generator.generate(image)
+    predictor.set_image(image)
 
-    # マッチするマスクだけを抽出
-    filtered_masks: List[np.ndarray] = []
-    for m in masks:
-        avg_color = extract_average_color(image, m['segmentation'])
-        if is_color_close(avg_color, target_color):
-            filtered_masks.append(m['segmentation'])
+    input_point = np.array([[p.x, p.y] for p in points])
+    input_label = np.array([1] * len(points))  # 前景として扱う
 
-    # 背景色（画像全体の平均 or 中央値）を取得
-    background_color = np.median(image.reshape(-1, 3), axis=0).astype(np.uint8)
+    masks, scores, logits = predictor.predict(
+    point_coords=input_point,
+    point_labels=input_label,
+    multimask_output=False
+    )
 
-    # 出力画像を初期化（壁色で塗りつぶしたRGB画像）
-    result = np.full_like(image, background_color)
+    # mask = masks[0]
 
-    # 選ばれたマスクの中にある部分だけ元画像の値を貼る
-    for mask in filtered_masks:
-        result[mask] = image[mask]
+    rgba_image = apply_mask_to_image(image, masks)
+
+    # wall_color = estimate_wall_color(image)
+
+    # output = np.zeros_like(image)
+    # output[:, :] = wall_color  # RGB 3チャンネル全部 wall_color に
+
+    # output[mask] = image[mask]
 
     # 必要なら RGBA 化も可能
-    return encode_image_to_png_bytes(result)
+    return encode_image(rgba_image)
