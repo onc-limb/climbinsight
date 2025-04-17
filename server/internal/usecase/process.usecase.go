@@ -33,8 +33,8 @@ type UploadFile struct {
 }
 
 type Point struct {
-	X float64 `json:"x"`
-	Y float64 `json:"y"`
+	X float32 `json:"x"`
+	Y float32 `json:"y"`
 }
 
 func NewProcessUsecase(srv Services, sh domain.IStorageHandler) *ProcessUsecase {

@@ -1,8 +1,8 @@
 package domain
 
 type Point struct {
-	X float64
-	Y float64
+	X float32
+	Y float32
 }
 
 type IImageEditService interface {

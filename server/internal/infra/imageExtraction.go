@@ -4,6 +4,7 @@ import (
 	pb "climbinsight/server/ai"
 	"climbinsight/server/internal/domain"
 	"context"
+	"fmt"
 	"time"
 
 	"google.golang.org/grpc"
@@ -18,10 +19,16 @@ func NewImageEditService(conn *grpc.ClientConn) *ImageEditService {
 }
 
 func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]byte, error) {
+	var ps []*pb.Point
+	for _, p := range points {
+		ps = append(ps, &pb.Point{X: p.X, Y: p.Y})
+	}
+
+	fmt.Println("point: ", ps)
 	// リクエスト構築
 	input := &pb.InputRequest{
 		Image:  image,
-		Points: points,
+		Points: ps,
 	}
 
 	// タイムアウト付きコンテキスト
