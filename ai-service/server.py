@@ -17,7 +17,7 @@ class AIService(ai_pb2_grpc.AIServiceServicer):
 
     def Process(self, request, context):
         print(f"📥 受信")
-        result_bytes = process_image_bytes(request.input, self.gen)
+        result_bytes = process_image_bytes(request.input, self.gen, target_color=(255, 0, 0))
         print(f"処理完了")
         return ai_pb2.ProcessImageResponse(processed_image=result_bytes, mime_type="image/png")
     

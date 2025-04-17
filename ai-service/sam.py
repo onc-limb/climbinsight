@@ -1,9 +1,8 @@
-import io
+from typing import List
 import cv2
 import numpy as np
 import torch
 from segment_anything import sam_model_registry, SamAutomaticMaskGenerator
-from PIL import Image
 
 # モデル読み込み
 def load_sam_model():
@@ -26,21 +25,39 @@ def encode_image_to_png_bytes(image: np.ndarray) -> bytes:
     success, encoded = cv2.imencode(".png", image_bgra)
     return encoded.tobytes()
 
-# マスクを使って透明化する関数
-def apply_mask_to_image(image: np.ndarray, mask: np.ndarray) -> np.ndarray:
-    alpha = (mask * 255).astype(np.uint8)
-    rgba = cv2.cvtColor(image, cv2.COLOR_RGB2RGBA)
-    rgba[..., 3] = alpha
-    return rgba
+
+def extract_average_color(image: np.ndarray, mask: np.ndarray) -> np.ndarray:
+    # マスク領域の平均RGB色を取得
+    masked_pixels = image[mask.astype(bool)]
+    if masked_pixels.size == 0:
+        return np.array([0, 0, 0])
+    return masked_pixels.mean(axis=0)
+
+def is_color_close(color1, color2, threshold=50) -> bool:
+    # ユークリッド距離で比較（近い色かどうか）
+    return np.linalg.norm(np.array(color1) - np.array(color2)) < threshold
 
 # メイン処理（バイナリ入出力）
-def process_image_bytes(image_bytes: bytes, mask_generator: SamAutomaticMaskGenerator) -> bytes:
+def process_image_bytes(image_bytes: bytes, mask_generator: SamAutomaticMaskGenerator, target_color=(255, 0, 0)) -> bytes:
     image = decode_image(image_bytes)
     masks = mask_generator.generate(image)
 
-    # 面積が最大のマスクを使う
-    largest = max(masks, key=lambda x: x['area'])
-    mask = largest['segmentation']
+    # マッチするマスクだけを抽出
+    filtered_masks: List[np.ndarray] = []
+    for m in masks:
+        avg_color = extract_average_color(image, m['segmentation'])
+        if is_color_close(avg_color, target_color):
+            filtered_masks.append(m['segmentation'])
 
-    rgba = apply_mask_to_image(image, mask)
-    return encode_image_to_png_bytes(rgba)
+    # 背景色（画像全体の平均 or 中央値）を取得
+    background_color = np.median(image.reshape(-1, 3), axis=0).astype(np.uint8)
+
+    # 出力画像を初期化（壁色で塗りつぶしたRGB画像）
+    result = np.full_like(image, background_color)
+
+    # 選ばれたマスクの中にある部分だけ元画像の値を貼る
+    for mask in filtered_masks:
+        result[mask] = image[mask]
+
+    # 必要なら RGBA 化も可能
+    return encode_image_to_png_bytes(result)
