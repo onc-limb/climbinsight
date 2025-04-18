@@ -26,29 +26,45 @@ def decode_image(image_bytes: bytes) -> np.ndarray:
     image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
     return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
+def build_combined_mask_from_clicks(
+    image: np.ndarray,
+    points: List[Coordinate],
+    predictor: SamPredictor,
+    min_area: int = 0
+) -> np.ndarray:
+    """
+    クリック位置ごとにpredict()を呼び、マスクを合成する。
+    小さすぎるマスクは除外。
+
+    Returns:
+        合成マスク（bool配列）: クリックに対応するホールド部分
+    """
+    combined_mask = np.zeros_like(image[:, :, 0], dtype=bool)  # shape: (H, W)
+
+    for p in points:
+        input_point = np.array([[p.x, p.y]])
+        input_label = np.array([1])  # 前景とみなす
+
+        masks, _, _ = predictor.predict(
+            point_coords=input_point,
+            point_labels=input_label,
+            multimask_output=False
+        )
+
+        single_mask = masks[0]
+
+        if min_area > 0 & np.sum(single_mask) < min_area:
+            continue
+
+        combined_mask |= single_mask  # 合成（OR）
+
+    return combined_mask
+
 def apply_mask_to_image(image: np.ndarray, mask: np.ndarray) -> np.ndarray:
     if mask.ndim == 3:
         mask = mask[0]  # SAMからの出力が (1, H, W) の場合
     alpha = (mask * 255).astype(np.uint8)
     return np.dstack((image, alpha))  # RGB + Alpha
-
-def filter_largest_connected_component(mask: np.ndarray) -> np.ndarray:
-    # 入力: bool型mask (H, W)
-    mask_uint8 = (mask * 255).astype(np.uint8)
-    num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(mask_uint8)
-
-    if num_labels <= 1:
-        return mask  # 背景しかない
-
-    # 面積最大のラベル（label 0は背景なので除く）
-    largest_label = 1 + np.argmax(stats[1:, cv2.CC_STAT_AREA])
-    return labels == largest_label
-
-def estimate_wall_color(image: np.ndarray) -> tuple[int, int, int]:
-    h, w, _ = image.shape
-    center_region = image[h//3:2*h//3, w//3:2*w//3]  # 中央1/3領域
-    avg_color = center_region.mean(axis=(0, 1)).astype(int)
-    return tuple(avg_color)  # (R, G, B)
 
 def encode_image(image: np.ndarray) -> bytes:
     image_pil = Image.fromarray(image)
@@ -62,25 +78,13 @@ def process_image_bytes(image_bytes: bytes, points: List[Coordinate], predictor:
     image = decode_image(image_bytes)
     predictor.set_image(image)
 
-    input_point = np.array([[p.x, p.y] for p in points])
-    input_label = np.array([1] * len(points))  # 前景として扱う
+    combined_mask = build_combined_mask_from_clicks(image, points, predictor)
 
-    masks, scores, logits = predictor.predict(
-    point_coords=input_point,
-    point_labels=input_label,
-    multimask_output=False
-    )
+    # 合成マスクが空だった場合
+    if np.sum(combined_mask) == 0:
+        print("クリックしたマスクがすべて除外されました")
+        return encode_image(image)  # or return None
 
-    # mask = masks[0]
+    rgba_image = apply_mask_to_image(image, combined_mask)
 
-    rgba_image = apply_mask_to_image(image, masks)
-
-    # wall_color = estimate_wall_color(image)
-
-    # output = np.zeros_like(image)
-    # output[:, :] = wall_color  # RGB 3チャンネル全部 wall_color に
-
-    # output[mask] = image[mask]
-
-    # 必要なら RGBA 化も可能
     return encode_image(rgba_image)
