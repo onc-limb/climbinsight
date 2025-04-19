@@ -16,6 +16,7 @@ import (
 	"climbinsight/server/internal/domain"
 	"climbinsight/server/internal/infra"
 	"climbinsight/server/internal/presentation"
+	"climbinsight/server/internal/usecase"
 )
 
 const maxMsgSize = 20 * 1024 * 1024 // 20MB
@@ -39,6 +40,7 @@ func init() {
 }
 
 func main() {
+	// gRPCコネクション作成
 	conn, err := grpc.NewClient("localhost:50051",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions(
@@ -50,10 +52,9 @@ func main() {
 	}
 	defer conn.Close()
 
-	// AIサービスの作成
+	// サービス群作成
 	ies := infra.NewImageEditService(conn)
 
-	// 生成AIサービスの作成
 	var tgs any
 	if os.Getenv("ENV") == "prd" {
 		tgs = infra.NewTextGenerateService(deepseek.NewClient(os.Getenv("DEEPSEEK_API_KEY")))
@@ -62,8 +63,13 @@ func main() {
 	}
 
 	sh, _ := infra.NewStorageHandler()
+	ts, _ := infra.NewTmpStorage()
 
-	ph := presentation.NewProcessHandler(ies, tgs.(domain.ITextGenerateService), sh)
+	// ユースケース群作成
+	gu := usecase.NewGenerateUsecase(tgs.(domain.ITextGenerateService), ts)
+	pu := usecase.NewProcessUsecase(ies, sh, ts)
+
+	h := presentation.NewHandler(gu, pu)
 
 	r := gin.Default()
 
@@ -82,7 +88,13 @@ func main() {
 		})
 	})
 
-	r.POST("/process", ph.Process)
+	r.GET("/result", h.GetResult)
+
+	images := r.Group("/images")
+	images.POST("/process", h.Process)
+
+	contents := r.Group("/contents")
+	contents.POST("/generate", h.Generate)
 
 	r.Run(":8080")
 }

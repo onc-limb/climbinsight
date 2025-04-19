@@ -1,7 +1,6 @@
 package presentation
 
 import (
-	"climbinsight/server/internal/domain"
 	"climbinsight/server/internal/usecase"
 	"climbinsight/server/utils"
 	"encoding/json"
@@ -12,16 +11,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type ProcessHandler struct {
-	services usecase.Services
-	storage  domain.IStorageHandler
+type Handler struct {
+	generateUsecase *usecase.GenerateUsecase
+	processUsecase  *usecase.ProcessUsecase
 }
 
-func NewProcessHandler(ies domain.IImageEditService, tgs domain.ITextGenerateService, sh domain.IStorageHandler) *ProcessHandler {
-	return &ProcessHandler{services: usecase.Services{ImageEditService: ies, TextGenerateService: tgs}, storage: sh}
+func NewHandler(gu *usecase.GenerateUsecase, pu *usecase.ProcessUsecase) *Handler {
+	return &Handler{generateUsecase: gu, processUsecase: pu}
 }
 
-func (ph *ProcessHandler) Process(c *gin.Context) {
+func (h *Handler) Process(c *gin.Context) {
+	sessionId := "session"
 	// 画像ファイルを受け取る
 	fh, err := c.FormFile("image")
 	if err != nil {
@@ -43,22 +43,13 @@ func (ph *ProcessHandler) Process(c *gin.Context) {
 		return
 	}
 
-	var content usecase.Contents
-	if err := c.Bind(&content); err != nil {
-		utils.RespondError(c, http.StatusBadRequest, "コンテントの読み込みに失敗しました", err)
-		return
-	}
-
-	u := usecase.NewProcessUsecase(ph.services, ph.storage)
-	imageDataURL, post, err := u.Process(uploadFile, points, content)
-	if err != nil {
+	if err := h.processUsecase.Process(uploadFile, points, sessionId); err != nil {
 		utils.RespondError(c, http.StatusInternalServerError, "画像抽出に失敗しました", err)
 		return
 	}
 	// レスポンス出力
 	c.JSON(http.StatusOK, gin.H{
-		"imageData": imageDataURL,
-		"content":   post,
+		"message": "image is accepted.",
 	})
 }
 
@@ -79,4 +70,28 @@ func preseUpdateFile(fh *multipart.FileHeader) (*usecase.UploadFile, error) {
 		ContentType: fh.Header.Get("Content-Type"),
 		Data:        &imageBytes,
 	}, nil
+}
+
+func (h *Handler) Generate(c *gin.Context) {
+	sessionId := "session"
+	var content usecase.Contents
+	if err := c.Bind(&content); err != nil {
+		utils.RespondError(c, http.StatusBadRequest, "コンテントの読み込みに失敗しました", err)
+		return
+	}
+
+	if err := h.generateUsecase.Generate(content, sessionId); err != nil {
+		utils.RespondError(c, http.StatusBadRequest, "コンテントの保存に失敗しました", err)
+		return
+	}
+
+	// レスポンス出力
+	c.JSON(http.StatusOK, gin.H{
+		"message": "content is accepted.",
+	})
+
+}
+
+func (h *Handler) GetResult(c *gin.Context) {
+
 }
