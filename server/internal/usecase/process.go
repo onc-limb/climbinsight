@@ -11,8 +11,8 @@ import (
 
 type ProcessUsecase struct {
 	imageEditService    domain.IImageEditService
-	imageStorageService domain.IStorageHandler
-	sessionStoreService domain.ITmpStorage
+	imageStorageService domain.IImageStorageService
+	sessionStoreService domain.ISessionStoreService
 }
 
 type UploadFile struct {
@@ -26,7 +26,7 @@ type Point struct {
 	Y float32 `json:"y"`
 }
 
-func NewProcessUsecase(ies domain.IImageEditService, iss domain.IStorageHandler, sss domain.ITmpStorage) *ProcessUsecase {
+func NewProcessUsecase(ies domain.IImageEditService, iss domain.IImageStorageService, sss domain.ISessionStoreService) *ProcessUsecase {
 	return &ProcessUsecase{imageEditService: ies, imageStorageService: iss, sessionStoreService: sss}
 }
 

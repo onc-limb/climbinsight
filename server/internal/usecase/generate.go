@@ -6,7 +6,7 @@ import (
 
 type GenerateUsecase struct {
 	textGenerateService domain.ITextGenerateService
-	sessionStoreService domain.ITmpStorage
+	sessionStoreService domain.ISessionStoreService
 }
 
 type Contents struct {
@@ -16,7 +16,7 @@ type Contents struct {
 	TryCount uint   `form:"tryCount"`
 }
 
-func NewGenerateUsecase(tgs domain.ITextGenerateService, sss domain.ITmpStorage) *GenerateUsecase {
+func NewGenerateUsecase(tgs domain.ITextGenerateService, sss domain.ISessionStoreService) *GenerateUsecase {
 	return &GenerateUsecase{textGenerateService: tgs, sessionStoreService: sss}
 }
 

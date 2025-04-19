@@ -3,6 +3,7 @@ package infra
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/cohesion-org/deepseek-go"
 )
@@ -13,15 +14,44 @@ const systemMessage = `あなたはInstagram投稿文とハッシュタグを生
 ハッシュタグには#{ジム名}、#{グレード}、#{スタイル}を入れてください。
 ハッシュタグには必ず#climbinsight、#ボルダリングを入れてください。`
 
-type TextGenerateService struct {
-	client *deepseek.Client
+type generativeClient interface {
+	CreateChatCompletion(
+		ctx context.Context,
+		request *deepseek.ChatCompletionRequest,
+	) (*deepseek.ChatCompletionResponse, error)
 }
 
-func NewTextGenerateService(client *deepseek.Client) *TextGenerateService {
-	return &TextGenerateService{client: client}
+type dummyClient struct{}
+
+func (d dummyClient) CreateChatCompletion(
+	ctx context.Context,
+	request *deepseek.ChatCompletionRequest,
+) (*deepseek.ChatCompletionResponse, error) {
+	return &deepseek.ChatCompletionResponse{
+		Choices: []deepseek.Choice{
+			{
+				Message: deepseek.Message{
+					Content: "仮のテキストです",
+				},
+			},
+		},
+	}, nil
 }
 
-func (tgs *TextGenerateService) Generate(grade, gym, style string, tryCount uint) (string, error) {
+type textGenerateService struct {
+	client generativeClient
+}
+
+func NewTextGenerateService() *textGenerateService {
+	if os.Getenv("ENV") == "prd" {
+		client := deepseek.NewClient(os.Getenv("DEEPSEEK_API_KEY"))
+		return &textGenerateService{client: client}
+	} else {
+		return &textGenerateService{client: &dummyClient{}}
+	}
+}
+
+func (tgs *textGenerateService) Generate(grade, gym, style string, tryCount uint) (string, error) {
 	impression := "登れて嬉しかった"
 	userMessage := fmt.Sprintf(`以下の情報を元にInstagramに投稿するための文章とハッシュタグを作ってください。
 

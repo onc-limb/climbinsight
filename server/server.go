@@ -5,7 +5,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/cohesion-org/deepseek-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -13,7 +12,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	pb "climbinsight/server/ai"
-	"climbinsight/server/internal/domain"
 	"climbinsight/server/internal/infra"
 	"climbinsight/server/internal/presentation"
 	"climbinsight/server/internal/usecase"
@@ -23,12 +21,6 @@ const maxMsgSize = 20 * 1024 * 1024 // 20MB
 
 type Client struct {
 	AiClient pb.AIServiceClient
-}
-
-type dummyService struct{}
-
-func (d dummyService) Generate(grade, gym, style string, tryCount uint) (string, error) {
-	return "ローカル環境で実行しました。", nil
 }
 
 func init() {
@@ -54,19 +46,12 @@ func main() {
 
 	// サービス群作成
 	ies := infra.NewImageEditService(conn)
-
-	var tgs any
-	if os.Getenv("ENV") == "prd" {
-		tgs = infra.NewTextGenerateService(deepseek.NewClient(os.Getenv("DEEPSEEK_API_KEY")))
-	} else {
-		tgs = dummyService{}
-	}
-
-	sh, _ := infra.NewStorageHandler()
-	ts, _ := infra.NewTmpStorage()
+	tgs := infra.NewTextGenerateService()
+	sh, _ := infra.NewimageStorageService()
+	ts, _ := infra.NewSessionStoreService()
 
 	// ユースケース群作成
-	gu := usecase.NewGenerateUsecase(tgs.(domain.ITextGenerateService), ts)
+	gu := usecase.NewGenerateUsecase(tgs, ts)
 	pu := usecase.NewProcessUsecase(ies, sh, ts)
 
 	h := presentation.NewHandler(gu, pu)

@@ -8,11 +8,11 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type TmpStorage struct {
+type sessionStoreService struct {
 	Client *redis.Client
 }
 
-func NewTmpStorage() (*TmpStorage, error) {
+func NewSessionStoreService() (*sessionStoreService, error) {
 	redisURL := os.Getenv("REDIS_URL") // 例: "redis://localhost:6379" または Upstash の rediss://...
 
 	opt, err := redis.ParseURL(redisURL)
@@ -29,10 +29,10 @@ func NewTmpStorage() (*TmpStorage, error) {
 		panic("failed to connect to Redis: " + err.Error())
 	}
 
-	return &TmpStorage{Client: client}, nil
+	return &sessionStoreService{Client: client}, nil
 }
 
-func (t *TmpStorage) SaveProcessedImage(sessionId string, imageUrl string) error {
+func (t *sessionStoreService) SaveProcessedImage(sessionId string, imageUrl string) error {
 	ctx := context.Background()
 	key := "session:" + sessionId
 
@@ -46,7 +46,7 @@ func (t *TmpStorage) SaveProcessedImage(sessionId string, imageUrl string) error
 	return t.Client.Expire(ctx, key, 1*time.Hour).Err()
 }
 
-func (t *TmpStorage) SaveGeneratedContent(sessionId string, content string) error {
+func (t *sessionStoreService) SaveGeneratedContent(sessionId string, content string) error {
 	ctx := context.Background()
 	key := "session:" + sessionId
 

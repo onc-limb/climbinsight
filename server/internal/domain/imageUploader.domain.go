@@ -2,7 +2,7 @@ package domain
 
 import "io"
 
-type IStorageHandler interface {
+type IImageStorageService interface {
 	UploadImage(io.Reader, string, string) error
 	GeneratePresignedGetURL(string, string) (string, error)
 }
