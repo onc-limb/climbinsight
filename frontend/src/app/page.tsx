@@ -124,7 +124,7 @@ export default function TopPage() {
       />
       <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
         {points.map((point, idx) => (
-          <circle key={idx} cx={point.x} cy={point.y} r={8} fill="red" />
+          <circle key={idx} cx={point.x} cy={point.y} r={4} fill="red" />
         ))}
       </svg>
     </div>
