@@ -5,8 +5,6 @@ import (
 	"climbinsight/server/internal/domain"
 	"fmt"
 	"path/filepath"
-
-	"github.com/google/uuid"
 )
 
 type ProcessUsecase struct {
@@ -31,9 +29,8 @@ func NewProcessUsecase(ies domain.IImageEditService, iss domain.IImageStorageSer
 }
 
 func (pu *ProcessUsecase) Process(file *UploadFile, points []Point, sessionId string) error {
-	imageId := uuid.New().String()
 	// 画像を保存
-	originName := fmt.Sprintf("original/%s.%s", imageId, filepath.Ext(file.FileName))
+	originName := fmt.Sprintf("original/%s.%s", sessionId, filepath.Ext(file.FileName))
 	if err := pu.imageStorageService.UploadImage(bytes.NewReader(*file.Data), originName, file.ContentType); err != nil {
 		return err
 	}
@@ -49,7 +46,7 @@ func (pu *ProcessUsecase) Process(file *UploadFile, points []Point, sessionId st
 	}
 
 	//画像を保存
-	processedName := fmt.Sprintf("processed/%s.%s", imageId, filepath.Ext(file.FileName))
+	processedName := fmt.Sprintf("processed/%s.%s", sessionId, filepath.Ext(file.FileName))
 	if err := pu.imageStorageService.UploadImage(bytes.NewReader(processedImage), processedName, "image/png"); err != nil {
 		return err
 	}

@@ -9,7 +9,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
+
+type session struct {
+	SessionId string `json:"sessionId"`
+}
 
 type Handler struct {
 	generateUsecase *usecase.GenerateUsecase
@@ -21,7 +26,6 @@ func NewHandler(gu *usecase.GenerateUsecase, pu *usecase.ProcessUsecase) *Handle
 }
 
 func (h *Handler) Process(c *gin.Context) {
-	sessionId := "session"
 	// 画像ファイルを受け取る
 	fh, err := c.FormFile("image")
 	if err != nil {
@@ -42,14 +46,15 @@ func (h *Handler) Process(c *gin.Context) {
 		utils.RespondError(c, http.StatusBadRequest, "pointの読み込みに失敗しました", err)
 		return
 	}
+	uuid := uuid.New().String()
 
-	if err := h.processUsecase.Process(uploadFile, points, sessionId); err != nil {
+	if err := h.processUsecase.Process(uploadFile, points, uuid); err != nil {
 		utils.RespondError(c, http.StatusInternalServerError, "画像抽出に失敗しました", err)
 		return
 	}
 	// レスポンス出力
 	c.JSON(http.StatusOK, gin.H{
-		"message": "image is accepted.",
+		"session": uuid,
 	})
 }
 
@@ -73,14 +78,19 @@ func preseUpdateFile(fh *multipart.FileHeader) (*usecase.UploadFile, error) {
 }
 
 func (h *Handler) Generate(c *gin.Context) {
-	sessionId := "session"
+	var session session
+	if err := c.ShouldBindJSON(&session); err != nil {
+		utils.RespondError(c, http.StatusBadRequest, "sessionIdの読み込みに失敗しました", err)
+		return
+	}
+
 	var content usecase.Contents
 	if err := c.Bind(&content); err != nil {
 		utils.RespondError(c, http.StatusBadRequest, "コンテントの読み込みに失敗しました", err)
 		return
 	}
 
-	if err := h.generateUsecase.Generate(content, sessionId); err != nil {
+	if err := h.generateUsecase.Generate(content, session.SessionId); err != nil {
 		utils.RespondError(c, http.StatusBadRequest, "コンテントの保存に失敗しました", err)
 		return
 	}
