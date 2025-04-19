@@ -1,12 +1,32 @@
 'use client'
 
-import { useResultStore } from '@/stores/resultStore';
+import LoadingScreen from '@/components/Loading';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function ResultPage() {
-  const { imageData, content } = useResultStore();
+  const [imageData, setImageData] = useState<string | null>(null);
+  const [content, setContent] = useState<string | null>(null);
+  const sessionId = typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search).get('session')
+    : null
+
+  useEffect(() => {
+    if (!sessionId) return
+    const es = new EventSource(`/result?session=${sessionId}`)
+  
+    es.onmessage = (event) => {
+      const data = JSON.parse(event.data)
+      setImageData(data.image)
+      setContent(data.content)
+      es.close() // 一度受け取ったら閉じる
+    }
+  
+    return () => {
+      es.close()
+    }
+  }, [sessionId])
   const imgRef = useRef<HTMLImageElement | null>(null)
 
   const handleDownload = () => {
@@ -34,10 +54,13 @@ export default function ResultPage() {
     }, 'image/png')
   }
 
+  if (!imageData || !content) return <LoadingScreen/>
+
   return (
     <main className="max-w-xl mx-auto p-6 space-y-6">
-      { imageData && (<><h1 className="text-2xl font-bold text-center">処理結果</h1>
-
+      { imageData && content && (
+      <>
+      <h1 className="text-2xl font-bold text-center">処理結果</h1>
       <Image ref={imgRef} src={imageData} alt="Result" width={500}
         height={400} className="w-full rounded-lg shadow" />
 
