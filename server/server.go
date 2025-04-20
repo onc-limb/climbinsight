@@ -53,8 +53,9 @@ func main() {
 	// ユースケース群作成
 	gu := usecase.NewGenerateUsecase(tgs, ts)
 	pu := usecase.NewProcessUsecase(ies, sh, ts)
+	ru := usecase.NewResultUsecase(ts)
 
-	h := presentation.NewHandler(gu, pu)
+	h := presentation.NewHandler(gu, pu, ru)
 
 	r := gin.Default()
 

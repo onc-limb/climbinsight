@@ -1,12 +1,17 @@
 package presentation
 
 import (
+	"climbinsight/server/internal/domain"
 	"climbinsight/server/internal/usecase"
 	"climbinsight/server/utils"
+	"context"
 	"encoding/json"
+	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -19,10 +24,11 @@ type session struct {
 type Handler struct {
 	generateUsecase *usecase.GenerateUsecase
 	processUsecase  *usecase.ProcessUsecase
+	resultUsecase   *usecase.ResultUsecase
 }
 
-func NewHandler(gu *usecase.GenerateUsecase, pu *usecase.ProcessUsecase) *Handler {
-	return &Handler{generateUsecase: gu, processUsecase: pu}
+func NewHandler(gu *usecase.GenerateUsecase, pu *usecase.ProcessUsecase, ru *usecase.ResultUsecase) *Handler {
+	return &Handler{generateUsecase: gu, processUsecase: pu, resultUsecase: ru}
 }
 
 func (h *Handler) Process(c *gin.Context) {
@@ -103,5 +109,60 @@ func (h *Handler) Generate(c *gin.Context) {
 }
 
 func (h *Handler) GetResult(c *gin.Context) {
+	sessionID := c.Query("session")
+	if sessionID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "sessionId is required"})
+		return
+	}
+	fmt.Print("セッションIDを受け取りました。: ", sessionID)
 
+	ctx := context.Background()
+
+	// SSE用のヘッダー
+	c.Writer.Header().Set("Content-Type", "text/event-stream")
+	c.Writer.Header().Set("Cache-Control", "no-cache")
+	c.Writer.Header().Set("Connection", "keep-alive")
+	c.Writer.Flush()
+
+	// タイムアウト付きContext（30秒など）
+	timeoutCtx, cancel := context.WithTimeout(ctx, 1*time.Minute)
+	defer cancel()
+
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-timeoutCtx.Done():
+			// タイムアウト時に終了
+			fmt.Fprintf(c.Writer, "event: timeout\ndata: {\"error\": \"timeout\"}\n\n")
+			c.Writer.Flush()
+			return
+
+		case <-ticker.C:
+			// Redisからデータを取得
+			data, err := h.resultUsecase.GetResult(sessionID)
+			if err != nil {
+				log.Println("Redis error:", err)
+				return
+			}
+
+			tmp := &domain.Result{
+				Image:   "imageURL",
+				Content: "Content",
+			}
+			data = tmp
+
+			// 条件チェック
+			if data != nil {
+				// 揃ったらレスポンスを返して終了
+				jsonData, _ := json.Marshal(map[string]string{
+					"image":    data.Image,
+					"contents": data.Content,
+				})
+				fmt.Fprintf(c.Writer, "data: %s\n\n", jsonData)
+				c.Writer.Flush()
+				return
+			}
+		}
+	}
 }

@@ -14,12 +14,12 @@ export default function ResultPage() {
 
   useEffect(() => {
     if (!sessionId) return
-    const es = new EventSource(`/result?session=${sessionId}`)
+    const es = new EventSource(process.env.NEXT_PUBLIC_API_URL + `/result?session=${sessionId}`)
   
     es.onmessage = (event) => {
       const data = JSON.parse(event.data)
       setImageData(data.image)
-      setContent(data.content)
+      setContent(data.contents)
       es.close() // 一度受け取ったら閉じる
     }
   

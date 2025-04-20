@@ -43,7 +43,7 @@ export default function TopPage() {
         throw new Error("サーバーとの通信に失敗しました。");
       }
 
-      router.push('/result');
+      router.push(`/result?session=${sessionId}`);
     } catch (err) {
       setError((err as Error).message);
     } finally {
