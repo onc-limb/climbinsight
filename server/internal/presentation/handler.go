@@ -117,7 +117,6 @@ func (h *Handler) GetResult(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "sessionId is required"})
 		return
 	}
-	fmt.Print("セッションIDを受け取りました。: ", sessionID)
 
 	ctx := context.Background()
 
@@ -148,12 +147,6 @@ func (h *Handler) GetResult(c *gin.Context) {
 				log.Println("Redis error:", err)
 				return
 			}
-
-			// tmp := &domain.Result{
-			// 	Image:   "imageURL",
-			// 	Content: "Content",
-			// }
-			// data = tmp
 
 			// 条件チェック
 			if data != nil {
