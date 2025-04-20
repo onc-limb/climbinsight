@@ -65,7 +65,7 @@ func (ss *sessionStoreService) GetResult(sessionId string) (*domain.Result, erro
 	ctx := context.Background()
 	key := "session:" + sessionId
 
-	values, err := ss.Client.HMGet(ctx, key, "image", "content").Result()
+	values, err := ss.Client.HMGet(ctx, key, "url", "content").Result()
 	if err != nil {
 		return nil, err
 	}
