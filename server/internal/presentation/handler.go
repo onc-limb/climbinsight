@@ -53,10 +53,12 @@ func (h *Handler) Process(c *gin.Context) {
 	}
 	uuid := uuid.New().String()
 
-	if err := h.processUsecase.Process(uploadFile, points, uuid); err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, "画像抽出に失敗しました", err)
-		return
-	}
+	go func(uploadFile *usecase.UploadFile, points []usecase.Point, uuid string) {
+		if err := h.processUsecase.Process(uploadFile, points, uuid); err != nil {
+			utils.RespondError(c, http.StatusInternalServerError, "画像抽出に失敗しました", err)
+			return
+		}
+	}(uploadFile, points, uuid)
 	// レスポンス出力
 	c.JSON(http.StatusOK, gin.H{
 		"session": uuid,
@@ -95,10 +97,12 @@ func (h *Handler) Generate(c *gin.Context) {
 		return
 	}
 
-	if err := h.generateUsecase.Generate(content, session.SessionId); err != nil {
-		utils.RespondError(c, http.StatusBadRequest, "コンテントの保存に失敗しました", err)
-		return
-	}
+	go func(content usecase.Contents, sessionId string) {
+		if err := h.generateUsecase.Generate(content, sessionId); err != nil {
+			utils.RespondError(c, http.StatusBadRequest, "コンテントの保存に失敗しました", err)
+			return
+		}
+	}(content, session.SessionId)
 
 	// レスポンス出力
 	c.JSON(http.StatusOK, gin.H{
@@ -133,7 +137,6 @@ func (h *Handler) GetResult(c *gin.Context) {
 		select {
 		case <-timeoutCtx.Done():
 			// タイムアウト時に終了
-			fmt.Print("タイムアウトが発生しました。")
 			fmt.Fprintf(c.Writer, "event: timeout\ndata: {\"error\": \"timeout\"}\n\n")
 			c.Writer.Flush()
 			return
