@@ -3,30 +3,57 @@
 import LoadingScreen from '@/components/Loading';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 export default function ResultPage() {
+  const router = useRouter();
   const [imageData, setImageData] = useState<string | null>(null);
   const [content, setContent] = useState<string | null>(null);
-  const sessionId = typeof window !== 'undefined'
-    ? new URLSearchParams(window.location.search).get('session')
-    : null
+  const searchParams = useSearchParams()
+  const sessionId = searchParams.get('session')
 
   useEffect(() => {
     if (!sessionId) return
     const es = new EventSource(process.env.NEXT_PUBLIC_API_URL + `/result?session=${sessionId}`)
   
     es.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data)
+
+        // 正常データ受信時
+        setImageData(data.image)
+        setContent(data.contents)
+        es.close()
+      } catch (err) {
+        console.log(err)
+        alert('レスポンスの解析に失敗しました')
+        es.close()
+        router.push('/')
+      }
+    }
+
+    es.addEventListener('timeout', (event) => {
       const data = JSON.parse(event.data)
-      setImageData(data.image)
-      setContent(data.contents)
-      es.close() // 一度受け取ったら閉じる
+      console.log("⏱ タイムアウトイベント", data.error) // "timeout"
+      alert("処理がタイムアウトしました")
+      es.close()
+      router.push('/')
+    })
+
+    es.onerror = (err) => {
+      console.log("SSE接続エラー:", err)
+      alert('サーバーとの接続に失敗しました。再接続を試みてください。')
+      es.close()
+      // 再接続のロジックをここに追加
+      router.push('/') // トップページに戻る
     }
   
     return () => {
       es.close()
     }
-  }, [sessionId])
+  }, [sessionId, router])
   const imgRef = useRef<HTMLImageElement | null>(null)
 
   const handleDownload = () => {

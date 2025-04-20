@@ -1,7 +1,6 @@
 package presentation
 
 import (
-	"climbinsight/server/internal/domain"
 	"climbinsight/server/internal/usecase"
 	"climbinsight/server/utils"
 	"context"
@@ -125,7 +124,7 @@ func (h *Handler) GetResult(c *gin.Context) {
 	c.Writer.Flush()
 
 	// タイムアウト付きContext（30秒など）
-	timeoutCtx, cancel := context.WithTimeout(ctx, 1*time.Minute)
+	timeoutCtx, cancel := context.WithTimeout(ctx, 5*time.Minute)
 	defer cancel()
 
 	ticker := time.NewTicker(1 * time.Second)
@@ -134,6 +133,7 @@ func (h *Handler) GetResult(c *gin.Context) {
 		select {
 		case <-timeoutCtx.Done():
 			// タイムアウト時に終了
+			fmt.Print("タイムアウトが発生しました。")
 			fmt.Fprintf(c.Writer, "event: timeout\ndata: {\"error\": \"timeout\"}\n\n")
 			c.Writer.Flush()
 			return
@@ -146,11 +146,11 @@ func (h *Handler) GetResult(c *gin.Context) {
 				return
 			}
 
-			tmp := &domain.Result{
-				Image:   "imageURL",
-				Content: "Content",
-			}
-			data = tmp
+			// tmp := &domain.Result{
+			// 	Image:   "imageURL",
+			// 	Content: "Content",
+			// }
+			// data = tmp
 
 			// 条件チェック
 			if data != nil {
