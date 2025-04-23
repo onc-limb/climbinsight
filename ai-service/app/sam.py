@@ -14,7 +14,7 @@ class Coordinate:
 
 # モデル読み込み
 def load_sam_model():
-    checkpoint = "ai-service/sam_vit_b.pth"  # ダウンロードしたモデルファイルのパス
+    checkpoint = "/app/sam_vit_b.pth"  # ダウンロードしたモデルファイルのパス
     model_type = "vit_b"
     sam = sam_model_registry[model_type](checkpoint=checkpoint)
     sam.to("cuda" if torch.cuda.is_available() else "cpu")
