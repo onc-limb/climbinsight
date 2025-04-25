@@ -24,17 +24,20 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x08\x61i.proto\x12\x02\x61i\"\x1d\n\x0cInputRequest\x12\r\n\x05input\x18\x01 \x01(\t\" \n\x0eOutputResponse\x12\x0e\n\x06output\x18\x01 \x01(\t2<\n\tAIService\x12/\n\x07Process\x12\x10.ai.InputRequest\x1a\x12.ai.OutputResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x08\x61i.proto\x12\x02\x61i\"8\n\x0cInputRequest\x12\r\n\x05image\x18\x01 \x01(\x0c\x12\x19\n\x06points\x18\x02 \x03(\x0b\x32\t.ai.Point\"\x1d\n\x05Point\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\"B\n\x14ProcessImageResponse\x12\x17\n\x0fprocessed_image\x18\x01 \x01(\x0c\x12\x11\n\tmime_type\x18\x02 \x01(\t2B\n\tAIService\x12\x35\n\x07Process\x12\x10.ai.InputRequest\x1a\x18.ai.ProcessImageResponseB\x1bZ\x19\x63limbinsight/server/ai;aib\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'ai_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
-  DESCRIPTOR._loaded_options = None
+  _globals['DESCRIPTOR']._loaded_options = None
+  _globals['DESCRIPTOR']._serialized_options = b'Z\031climbinsight/server/ai;ai'
   _globals['_INPUTREQUEST']._serialized_start=16
-  _globals['_INPUTREQUEST']._serialized_end=45
-  _globals['_OUTPUTRESPONSE']._serialized_start=47
-  _globals['_OUTPUTRESPONSE']._serialized_end=79
-  _globals['_AISERVICE']._serialized_start=81
-  _globals['_AISERVICE']._serialized_end=141
+  _globals['_INPUTREQUEST']._serialized_end=72
+  _globals['_POINT']._serialized_start=74
+  _globals['_POINT']._serialized_end=103
+  _globals['_PROCESSIMAGERESPONSE']._serialized_start=105
+  _globals['_PROCESSIMAGERESPONSE']._serialized_end=171
+  _globals['_AISERVICE']._serialized_start=173
+  _globals['_AISERVICE']._serialized_end=239
 # @@protoc_insertion_point(module_scope)

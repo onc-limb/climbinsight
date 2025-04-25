@@ -14,13 +14,13 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-type StorageHandler struct {
+type imageStorageService struct {
 	Client     *s3.Client
 	BucketName string
 }
 
 // NewS3Uploader は MinIO または R2 へのアップローダーを初期化します
-func NewStorageHandler() (*StorageHandler, error) {
+func NewimageStorageService() (*imageStorageService, error) {
 	endpoint := os.Getenv("STORAGE_ENDPOINT")
 	accessKey := os.Getenv("STORAGE_ACCESS_KEY")
 	secretKey := os.Getenv("STORAGE_SECRET_KEY")
@@ -41,14 +41,14 @@ func NewStorageHandler() (*StorageHandler, error) {
 		o.BaseEndpoint = aws.String(endpoint)
 	})
 
-	return &StorageHandler{
+	return &imageStorageService{
 		Client:     client,
 		BucketName: os.Getenv("STORAGE_BUCKET_NAME"),
 	}, nil
 }
 
 // UploadImage は画像ファイルをS3互換バケットにアップロードします
-func (sh *StorageHandler) UploadImage(file io.Reader, fileName string, contentType string) error {
+func (sh *imageStorageService) UploadImage(file io.Reader, fileName string, contentType string) error {
 	_, err := sh.Client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket:      aws.String(sh.BucketName),
 		Key:         aws.String(fileName),
@@ -64,7 +64,7 @@ func (sh *StorageHandler) UploadImage(file io.Reader, fileName string, contentTy
 	return nil
 }
 
-func (sh *StorageHandler) GeneratePresignedGetURL(fileName string, contentType string) (string, error) {
+func (sh *imageStorageService) GeneratePresignedGetURL(fileName string, contentType string) (string, error) {
 	req := &s3.GetObjectInput{
 		Bucket:              aws.String(sh.BucketName),
 		Key:                 aws.String(fileName),

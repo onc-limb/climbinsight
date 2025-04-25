@@ -38,7 +38,7 @@ class AIServiceStub(object):
         self.Process = channel.unary_unary(
                 '/ai.AIService/Process',
                 request_serializer=ai__pb2.InputRequest.SerializeToString,
-                response_deserializer=ai__pb2.OutputResponse.FromString,
+                response_deserializer=ai__pb2.ProcessImageResponse.FromString,
                 _registered_method=True)
 
 
@@ -59,7 +59,7 @@ def add_AIServiceServicer_to_server(servicer, server):
             'Process': grpc.unary_unary_rpc_method_handler(
                     servicer.Process,
                     request_deserializer=ai__pb2.InputRequest.FromString,
-                    response_serializer=ai__pb2.OutputResponse.SerializeToString,
+                    response_serializer=ai__pb2.ProcessImageResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -89,7 +89,7 @@ class AIService(object):
             target,
             '/ai.AIService/Process',
             ai__pb2.InputRequest.SerializeToString,
-            ai__pb2.OutputResponse.FromString,
+            ai__pb2.ProcessImageResponse.FromString,
             options,
             channel_credentials,
             insecure,

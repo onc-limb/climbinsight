@@ -2,10 +2,9 @@ package infra
 
 import (
 	pb "climbinsight/server/ai"
+	"climbinsight/server/internal/domain"
 	"context"
-	"encoding/base64"
 	"fmt"
-	"net/http"
 	"time"
 
 	"google.golang.org/grpc"
@@ -19,23 +18,27 @@ func NewImageEditService(conn *grpc.ClientConn) *ImageEditService {
 	return &ImageEditService{client: pb.NewAIServiceClient(conn)}
 }
 
-func (ies *ImageEditService) Extraction(image []byte) (string, error) {
+func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]byte, error) {
+	var ps []*pb.Point
+	for _, p := range points {
+		ps = append(ps, &pb.Point{X: p.X, Y: p.Y})
+	}
+
+	fmt.Println("point: ", ps)
 	// リクエスト構築
-	imageBase64 := base64.StdEncoding.EncodeToString(image)
-	mimeType := http.DetectContentType(image)
-	imageDataURL := fmt.Sprintf("data:%s;base64,%s", mimeType, imageBase64)
 	input := &pb.InputRequest{
-		Input: imageDataURL,
+		Image:  image,
+		Points: ps,
 	}
 
 	// タイムアウト付きコンテキスト
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
 	// RPC 呼び出し
-	_, err := ies.client.Process(ctx, input)
+	res, err := ies.client.Process(ctx, input)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return imageDataURL, nil
+	return res.ProcessedImage, nil
 }
