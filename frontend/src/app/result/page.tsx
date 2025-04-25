@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
 import LoadingScreen from '@/components/Loading';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 
 export default function ResultPage() {
   const router = useRouter();
@@ -84,6 +84,7 @@ export default function ResultPage() {
   if (!imageData || !content) return <LoadingScreen/>
 
   return (
+    <Suspense fallback={<div>Loading...</div>}>
     <main className="max-w-xl mx-auto p-6 space-y-6">
       { imageData && content && (
       <>
@@ -128,5 +129,6 @@ export default function ResultPage() {
           トップページへ戻る
       </Link>
     </main>
+    </Suspense>
   );
 }
