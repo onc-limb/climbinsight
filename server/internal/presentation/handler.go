@@ -16,8 +16,13 @@ import (
 	"github.com/google/uuid"
 )
 
-type session struct {
-	SessionId string `json:"sessionId"`
+type ContentRequest struct {
+	SessionId  string `json:"sessionId"`
+	Grade      string `json:"grade"`
+	Gym        string `json:"gym"`
+	Style      string `json:"style"`
+	TryCount   uint   `json:"tryCount"`
+	IsGenerate bool   `json:"isGenerate"`
 }
 
 type Handler struct {
@@ -85,24 +90,25 @@ func preseUpdateFile(fh *multipart.FileHeader) (*usecase.UploadFile, error) {
 }
 
 func (h *Handler) Generate(c *gin.Context) {
-	var session session
-	if err := c.ShouldBindJSON(&session); err != nil {
-		utils.RespondError(c, http.StatusBadRequest, "sessionIdの読み込みに失敗しました", err)
+	var req ContentRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.RespondError(c, http.StatusBadRequest, "リクエストの読み込みに失敗しました", err)
 		return
 	}
 
-	var content usecase.Contents
-	if err := c.Bind(&content); err != nil {
-		utils.RespondError(c, http.StatusBadRequest, "コンテントの読み込みに失敗しました", err)
-		return
+	content := usecase.Contents{
+		Grade:    req.Grade,
+		Gym:      req.Gym,
+		Style:    req.Style,
+		TryCount: uint(req.TryCount),
 	}
 
-	go func(content usecase.Contents, sessionId string) {
-		if err := h.generateUsecase.Generate(content, sessionId); err != nil {
+	go func(content usecase.Contents, sessionId string, isGenerate bool) {
+		if err := h.generateUsecase.Generate(content, sessionId, isGenerate); err != nil {
 			utils.RespondError(c, http.StatusBadRequest, "コンテントの保存に失敗しました", err)
 			return
 		}
-	}(content, session.SessionId)
+	}(content, req.SessionId, req.IsGenerate)
 
 	// レスポンス出力
 	c.JSON(http.StatusOK, gin.H{
