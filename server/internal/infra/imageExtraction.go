@@ -6,16 +6,12 @@ import (
 	"context"
 	"fmt"
 	"time"
-
-	"google.golang.org/grpc"
 )
 
-type ImageEditService struct {
-	client pb.AIServiceClient
-}
+type ImageEditService struct{}
 
-func NewImageEditService(conn *grpc.ClientConn) *ImageEditService {
-	return &ImageEditService{client: pb.NewAIServiceClient(conn)}
+func NewImageEditService() *ImageEditService {
+	return &ImageEditService{}
 }
 
 func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]byte, error) {
@@ -36,7 +32,7 @@ func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]
 	defer cancel()
 
 	// RPC 呼び出し
-	res, err := ies.client.Process(ctx, input)
+	res, err := aiClient.Process(ctx, input)
 	if err != nil {
 		return nil, err
 	}

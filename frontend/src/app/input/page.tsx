@@ -1,8 +1,8 @@
 'use client';
 import React, { useState } from "react";
-import Image from "next/image";
 import { useResultStore } from '@/stores/resultStore';
 import { useRouter } from 'next/navigation';
+import { GRADES } from "@/const/grade.const";
 
 
 export default function TopPage() {
@@ -10,11 +10,11 @@ export default function TopPage() {
   const [grade, setGrade] = useState("V0");
   const [gym, setGym] = useState("");
   const [style, setStyle] = useState("");
-  const [tryCount, setTryCount] = useState(0)
+  const [tryCount, setTryCount] = useState(0);
+  const [isGenerate, setIsGenerate] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const image = useResultStore.getState().imageUrl
   const sessionId = useResultStore.getState().session
 
   const handleSubmit = async () => {
@@ -30,7 +30,8 @@ export default function TopPage() {
       grade,
       gym,
       style,
-      tryCount
+      tryCount,
+      isGenerate
     })
 
     try {
@@ -55,15 +56,6 @@ export default function TopPage() {
     <main className="max-w-xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold">ClimbInsight</h1>
       <p className="text-gray-600">課題の画像をアップロードして課題情報を記録しましょう！</p>
-      <div className="relative inline-block">
-      {image && (<Image
-        src={image}
-        alt="Preview"
-        width={500}
-        height={400}
-        className="w-full rounded-lg shadow"
-      />)}
-    </div>
       <div className="space-y-2">
         <div>
           <label className="block text-sm font-medium">グレード</label>
@@ -72,9 +64,9 @@ export default function TopPage() {
             onChange={(e) => setGrade(e.target.value)}
             className="border rounded px-2 py-1 w-full"
           >
-            {[...Array(10)].map((_, i) => (
-              <option key={i} value={`V${i}`}>
-                V{i}
+            {GRADES.map((grade) => (
+              <option key={grade} value={grade}>
+                {grade}
               </option>
             ))}
           </select>
@@ -112,7 +104,18 @@ export default function TopPage() {
             placeholder="トライ回数を入力してください"
           />
         </div>
-
+        <div className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={isGenerate}
+            onChange={(e) => setIsGenerate(e.target.checked)}
+            id="is-generate"
+            className="w-4 h-4"
+          />
+          <label htmlFor="is-generate" className="text-sm font-medium">
+            SNSの投稿文を自動で生成する
+          </label>
+        </div>
 
       {error && <p className="text-red-600 text-sm">⚠ {error}</p>}
 

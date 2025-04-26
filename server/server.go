@@ -8,16 +8,12 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 
 	pb "climbinsight/server/ai"
 	"climbinsight/server/internal/infra"
 	"climbinsight/server/internal/presentation"
 	"climbinsight/server/internal/usecase"
 )
-
-const maxMsgSize = 20 * 1024 * 1024 // 20MB
 
 type Client struct {
 	AiClient pb.AIServiceClient
@@ -33,19 +29,10 @@ func init() {
 
 func main() {
 	// gRPCコネクション作成
-	conn, err := grpc.NewClient(os.Getenv("AI_SERVER_URL"),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithDefaultCallOptions(
-			grpc.MaxCallRecvMsgSize(maxMsgSize),
-			grpc.MaxCallSendMsgSize(maxMsgSize),
-		))
-	if err != nil {
-		log.Fatalf("❌ 接続に失敗: %v", err)
-	}
-	defer conn.Close()
+	infra.ConnectGRPCInBackground()
 
 	// サービス群作成
-	ies := infra.NewImageEditService(conn)
+	ies := infra.NewImageEditService()
 	tgs := infra.NewTextGenerateService()
 	sh, _ := infra.NewimageStorageService()
 	ts, _ := infra.NewSessionStoreService()
