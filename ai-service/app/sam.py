@@ -6,15 +6,35 @@ import torch
 from segment_anything import sam_model_registry, SamPredictor
 from PIL import Image
 import io
+import os
+import boto3
 
 @dataclass
 class Coordinate:
     x: float
     y: float
 
+def download_model():
+    bucket_name = 'sam-models'
+    object_key = 'sam_vit_b.pth'
+    download_path = '/tmp/sam_vit_b.pth'
+
+    session = boto3.session.Session()
+    s3 = session.client(
+        service_name='s3',
+        aws_access_key_id=os.environ.get('STORAGE_ACCESS_KEY'),
+        aws_secret_access_key=os.environ.get('STORAGE_SECRET_KEY'),
+        endpoint_url=os.environ.get('STORAGE_ENDPOINT'),
+    )
+
+    s3.download_file(bucket_name, object_key, download_path)
+    print(f'Model downloaded to {download_path}')
+
+    return download_path
+
 # モデル読み込み
 def load_sam_model():
-    checkpoint = "/app/sam_vit_b.pth"  # ダウンロードしたモデルファイルのパス
+    checkpoint = download_model()  # ダウンロードしたモデルファイルのパス
     model_type = "vit_b"
     sam = sam_model_registry[model_type](checkpoint=checkpoint)
     sam.to("cuda" if torch.cuda.is_available() else "cpu")
