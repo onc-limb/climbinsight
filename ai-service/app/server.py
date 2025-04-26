@@ -1,6 +1,7 @@
 import grpc
 from concurrent import futures
 import time
+from dotenv import load_dotenv
 
 import ai_pb2
 import ai_pb2_grpc
@@ -11,6 +12,7 @@ MAX_MESSAGE_LENGTH = 20 * 1024 * 1024  # 20MB に増やすなど
 
 class AIService(ai_pb2_grpc.AIServiceServicer):
     def __init__(self):
+        load_dotenv()
         print("🧠 SAM モデルをロード中...")
         self.predictor = load_sam_model()
         print("✅ モデル準備完了")

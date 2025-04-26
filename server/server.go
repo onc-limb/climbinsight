@@ -33,7 +33,7 @@ func init() {
 
 func main() {
 	// gRPCコネクション作成
-	conn, err := grpc.NewClient("localhost:50051",
+	conn, err := grpc.NewClient(os.Getenv("AI_SERVER_URL"),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions(
 			grpc.MaxCallRecvMsgSize(maxMsgSize),
