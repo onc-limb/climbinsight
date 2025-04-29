@@ -28,9 +28,6 @@ func init() {
 }
 
 func main() {
-	// gRPCコネクション作成
-	infra.ConnectGRPCInBackground()
-
 	// サービス群作成
 	ies := infra.NewImageEditService()
 	tgs := infra.NewTextGenerateService()
