@@ -52,7 +52,7 @@ func main() {
 		MaxAge:           24 * time.Hour,
 	}))
 
-	r.GET("/health", func(c *gin.Context) {
+	r.GET("/healthz", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "healthy",
 		})
