@@ -14,7 +14,6 @@ WORKDIR /app
 
 COPY /app /app
 COPY --from=builder /usr/local /usr/local
-COPY /tmp/mobile_sam.pt /tmp
 
 RUN apt-get update && apt-get install -y \
   libgl1 \
