@@ -15,11 +15,6 @@ WORKDIR /app
 COPY /app .
 COPY --from=builder /usr/local /usr/local
 
-RUN apt-get update && apt-get install -y \
-  libgl1 \
-  libglib2.0-0 \
-  && apt-get clean && rm -rf /var/lib/apt/lists/*
-
 RUN find /usr/local -depth \
   \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) \
   -exec rm -rf '{}' +
