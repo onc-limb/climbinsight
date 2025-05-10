@@ -10,10 +10,16 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 実行ステージ
 FROM python:3.13-slim
-COPY /app /app
-COPY --from=builder /usr/local/lib/python3.13 /usr/local/lib/python3.13
+WORKDIR /app
 
-RUN apt-get update && apt-get install -y libgl1 && apt-get clean
+COPY /app /app
+COPY --from=builder /usr/local /usr/local
+COPY /tmp/mobile_sam.pt /tmp
+
+RUN apt-get update && apt-get install -y \
+  libgl1 \
+  libglib2.0-0 \
+  && apt-get clean
 
 RUN find /usr/local -depth \
   \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) \
