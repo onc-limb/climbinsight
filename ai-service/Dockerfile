@@ -5,20 +5,15 @@ FROM python:3.13 AS builder
 WORKDIR /app
 
 # 必要ファイルをコピー
-COPY requirements.txt /app
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 実行ステージ
 FROM python:3.13-slim
 WORKDIR /app
 
-COPY /app /app
+COPY /app .
 COPY --from=builder /usr/local /usr/local
-
-RUN apt-get update && apt-get install -y \
-  libgl1 \
-  libglib2.0-0 \
-  && apt-get clean
 
 RUN find /usr/local -depth \
   \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) \
