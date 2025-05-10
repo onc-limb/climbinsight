@@ -3,7 +3,8 @@ from typing import List
 import cv2
 import numpy as np
 import torch
-from segment_anything import sam_model_registry, SamPredictor
+# from segment_anything import sam_model_registry, SamPredictor
+from mobile_sam import SamPredictor, build_sam_vit_t
 from PIL import Image
 import io
 import os
@@ -34,9 +35,12 @@ def download_model():
 
 # モデル読み込み
 def load_sam_model():
-    checkpoint = download_model()  # ダウンロードしたモデルファイルのパス
-    model_type = "vit_b"
-    sam = sam_model_registry[model_type](checkpoint=checkpoint)
+    # SAM用のコード
+    # checkpoint = download_model()  # ダウンロードしたモデルファイルのパス
+    # model_type = "vit_b"
+    # sam = sam_model_registry[model_type](checkpoint=checkpoint)
+    checkpoint = "../tmp/mobile_sam.pt"
+    sam = build_sam_vit_t(checkpoint=checkpoint)
     sam.to("cuda" if torch.cuda.is_available() else "cpu")
     return SamPredictor(sam)
 
