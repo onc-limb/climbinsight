@@ -1,0 +1,8 @@
+boto3==1.38.3
+mobile_sam @ git+https://github.com/ChaoningZhang/MobileSAM.git@34bbbfdface3c18e5221aa7de6032d7220c6c6a1
+numpy==2.2.5
+opencv-python-headless==4.11.0.86
+pillow==11.2.1
+pydantic==2.11.3
+python-multipart==0.0.20
+torch==2.7.0

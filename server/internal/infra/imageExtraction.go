@@ -3,6 +3,7 @@ package infra
 import (
 	"bytes"
 	"climbinsight/server/internal/domain"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -70,7 +71,12 @@ func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]
 	}
 
 	// レスポンス読み取り
-	imageByte, err := io.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	imageByte, err := base64.StdEncoding.DecodeString(string(b))
 	if err != nil {
 		return nil, err
 	}

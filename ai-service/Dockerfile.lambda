@@ -1,0 +1,25 @@
+# ビルドステージ
+FROM python:3.13 AS builder
+
+# 作業ディレクトリを作成
+WORKDIR /tmp
+
+# 必要ファイルをコピー
+COPY requirements.lambda.txt .
+RUN python -m venv /opt/venv && \
+  /opt/venv/bin/pip install --no-cache-dir -r requirements.lambda.txt
+
+
+FROM public.ecr.aws/lambda/python:3.13
+
+# 作業ディレクトリを作成
+WORKDIR /var/task
+
+# 必要ファイルをコピー
+COPY --from=builder /opt/venv /opt/venv
+COPY /lambda .
+
+ENV PATH="/opt/venv/bin:$PATH"
+
+# サーバーを起動するコマンド
+CMD ["lambda_handler.handler"]
