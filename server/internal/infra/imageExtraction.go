@@ -52,11 +52,40 @@ func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]
 	writer.Close()
 
 	// リクエスト構築
-	req, err := http.NewRequest("POST", os.Getenv("AI_SERVER_URL")+"/process", &buf)
+	req, err := http.NewRequest("POST", os.Getenv("AI_LAMBDA_URL"), &buf)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	// // AWS認証情報を設定
+	// awsAccessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
+	// awsSecretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
+	// awsRegion := os.Getenv("AWS_REGION")
+
+	// _, err = config.LoadDefaultConfig(context.TODO(),
+	// 	config.WithRegion(awsRegion),
+	// 	config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
+	// 		awsAccessKeyID,
+	// 		awsSecretAccessKey,
+	// 		"")),
+	// )
+
+	// if err != nil {
+	// 	log.Fatalf("Error loading AWS config: %v", err)
+	// }
+
+	// // 署名バージョン4のSignerを作成
+	// signer := v4.NewSigner()
+
+	// // リクエストに署名
+	// err = signer.SignHTTP(context.TODO(), aws.Credentials{
+	// 	AccessKeyID:     awsAccessKeyID,
+	// 	SecretAccessKey: awsSecretAccessKey,
+	// }, req, "lambda", awsRegion, "lambda", time.Now())
+	// if err != nil {
+	// 	log.Fatalf("Error signing request: %v", err)
+	// }
 
 	// リクエスト送信
 	client := &http.Client{}
