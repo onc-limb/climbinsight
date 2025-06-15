@@ -9,15 +9,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
-	pb "climbinsight/server/ai"
 	"climbinsight/server/internal/infra"
 	"climbinsight/server/internal/presentation"
 	"climbinsight/server/internal/usecase"
 )
-
-type Client struct {
-	AiClient pb.AIServiceClient
-}
 
 func init() {
 	if os.Getenv("ENV") == "" {
