@@ -22,4 +22,4 @@ RUN find /usr/local -depth \
   -exec rm -rf '{}' +
 
 # サーバーを起動するコマンド
-CMD ["sh", "-c", "uvicorn server:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "uvicorn server:app --host :: --port ${PORT:-8000}"]
