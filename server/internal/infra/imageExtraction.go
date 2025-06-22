@@ -3,6 +3,7 @@ package infra
 import (
 	"bytes"
 	"climbinsight/server/internal/domain"
+	"climbinsight/server/utils"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -50,16 +51,13 @@ func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]
 
 	writer.Close()
 
-	// リクエスト構築
 	req, err := http.NewRequest("POST", os.Getenv("AI_SERVER_URL")+"/process", &buf)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 
-	// リクエスト送信
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := utils.FetchWithRetry(req)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +67,6 @@ func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]
 		return nil, fmt.Errorf("failed to process image: %s", resp.Status)
 	}
 
-	// レスポンス読み取り
 	imageByte, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err

@@ -19,7 +19,6 @@ type imageStorageService struct {
 	BucketName string
 }
 
-// NewS3Uploader は MinIO または R2 へのアップローダーを初期化します
 func NewimageStorageService() (*imageStorageService, error) {
 	endpoint := os.Getenv("STORAGE_ENDPOINT")
 	accessKey := os.Getenv("STORAGE_ACCESS_KEY")
@@ -47,7 +46,6 @@ func NewimageStorageService() (*imageStorageService, error) {
 	}, nil
 }
 
-// UploadImage は画像ファイルをS3互換バケットにアップロードします
 func (sh *imageStorageService) UploadImage(file io.Reader, fileName string, contentType string) error {
 	_, err := sh.Client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket:      aws.String(sh.BucketName),
