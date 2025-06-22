@@ -1,10 +1,10 @@
 import json
-import os
+import base64
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from fastapi import FastAPI, Form, Response, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
-from sam import load_sam_model, process_image_bytes, Coordinate
+from .sam import load_sam_model, process_image_bytes, Coordinate
 
 MAX_MESSAGE_LENGTH = 20 * 1024 * 1024  # 20MB に増やすなど
 
@@ -20,11 +20,16 @@ class Point(BaseModel):
     x: float
     y: float
 
+# レスポンススキーマ
+class ProcessResponse(BaseModel):
+    result_image_base64: str
+    mask_image_base64: str
+
 @app.get('/healthz')
 def health_check():
     return JSONResponse(content={"status": "ok"})
 
-@app.post('/process')
+@app.post('/process', response_model=ProcessResponse)
 async def process(file: UploadFile = File(...), points: str = Form(...)):
     try:
         global predictor 
@@ -39,12 +44,12 @@ async def process(file: UploadFile = File(...), points: str = Form(...)):
 
         p = [Coordinate(x=p.x, y=p.y) for p in points_list]
 
-        result_bytes = process_image_bytes(image_bytes, p, predictor)
+        result_bytes, mask_bytes = process_image_bytes(image_bytes, p, predictor)
 
-        return Response(
-            media_type="image/png",
-            content=result_bytes
-        )
+        return ProcessResponse(
+        result_image_base64=base64.b64encode(result_bytes).decode('utf-8'),
+        mask_image_base64=base64.b64encode(mask_bytes).decode('utf-8')
+    )
     except Exception as e:
         print(f"❌ エラー発生: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
