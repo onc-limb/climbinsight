@@ -14,7 +14,7 @@ type sessionStoreService struct {
 }
 
 func NewSessionStoreService() (*sessionStoreService, error) {
-	redisURL := os.Getenv("REDIS_URL") // 例: "redis://localhost:6379" または Upstash の rediss://...
+	redisURL := os.Getenv("REDIS_URL")
 
 	opt, err := redis.ParseURL(redisURL)
 	if err != nil {
@@ -37,13 +37,11 @@ func (ss *sessionStoreService) SaveProcessedImage(sessionId string, imageUrl str
 	ctx := context.Background()
 	key := "session:" + sessionId
 
-	// Hashに画像URLだけ先に追加
 	err := ss.Client.HSet(ctx, key, "url", imageUrl).Err()
 	if err != nil {
 		return err
 	}
 
-	// TTL（例: 1時間）を設定
 	return ss.Client.Expire(ctx, key, 1*time.Hour).Err()
 }
 
@@ -51,13 +49,11 @@ func (ss *sessionStoreService) SaveGeneratedContent(sessionId string, content st
 	ctx := context.Background()
 	key := "session:" + sessionId
 
-	// Hashに画像URLだけ先に追加
 	err := ss.Client.HSet(ctx, key, "content", content).Err()
 	if err != nil {
 		return err
 	}
 
-	// TTL（例: 1時間）を設定
 	return ss.Client.Expire(ctx, key, 1*time.Hour).Err()
 }
 
@@ -74,7 +70,6 @@ func (ss *sessionStoreService) GetResult(sessionId string) (*domain.Result, erro
 	content, ok2 := values[1].(string)
 
 	if !ok1 || !ok2 || image == "" || content == "" {
-		// どちらかが空または存在しない → not ready
 		return nil, nil
 	}
 
