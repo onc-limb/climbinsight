@@ -11,9 +11,13 @@
     "pages:deploy": "wrangler pages deploy .vercel/output/static --project-name=climbinsight"
   },
   "dependencies": {
+    "@tailwindcss/typography": "^0.5.16",
+    "autoprefixer": "^10.4.21",
     "next": "15.2.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "remark": "^15.0.1",
+    "remark-html": "^16.0.1",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
