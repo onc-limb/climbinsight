@@ -40,7 +40,7 @@ func main() {
 
 	// fixme: デプロイ前に詳細を設定する
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{os.Getenv("ALLOWED_ORIGIN")},
+		AllowOrigins:     []string{os.Getenv("ALLOWED_ORIGIN"), os.Getenv("ALLOWED_CUSTOM_ORIGIN")},
 		AllowMethods:     []string{"GET", "POST", "OPTION"},
 		AllowHeaders:     []string{"Content-Type"},
 		AllowCredentials: false,
