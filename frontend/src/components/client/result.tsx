@@ -94,6 +94,7 @@ export default function Result() {
             ref={imgRef}
             src={imageData}
             alt="Result"
+            crossOrigin="anonymous"
             unoptimized
             width={500}
             height={400}

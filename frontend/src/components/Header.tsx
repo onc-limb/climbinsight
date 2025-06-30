@@ -21,8 +21,7 @@ export default function Header() {
       <nav className="flex justify-between items-center max-w-7xl mx-auto px-4 py-2">
         <div className="flex-shrink-0">
         <Link href="/" className="flex items-center space-x-2">
-          <Image src="/Logo.jpg" alt="Logo" height={100} width={100} className="h-16 w-16" />
-          <span className="text-xl font-semibold text-gray-800">ClimbInsight</span>
+          <Image src="/Logo.png" alt="Logo" height={100} width={250} className="" />
         </Link>
         </div>
         <div className="flex justify-center flex-grow">
