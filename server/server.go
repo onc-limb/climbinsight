@@ -54,6 +54,7 @@ func main() {
 	})
 
 	r.GET("/result", h.GetResult)
+	r.POST("/inquery", h.SendInquery)
 
 	images := r.Group("/images")
 	images.POST("/process", h.Process)
