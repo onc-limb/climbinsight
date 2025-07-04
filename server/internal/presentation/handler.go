@@ -96,6 +96,8 @@ func (h *Handler) Generate(c *gin.Context) {
 		return
 	}
 
+	fmt.Print(req)
+
 	content := usecase.Contents{
 		Grade:    req.Grade,
 		Gym:      req.Gym,

@@ -14,7 +14,7 @@ export default function ContentsInputForm() {
   const [grade, setGrade] = useState("");
   const [gym, setGym] = useState("");
   const [style, setStyle] = useState("");
-  const [tryCount, setTryCount] = useState("");
+  const [tryCount, setTryCount] = useState<number| undefined>();
   const [isGenerate, setIsGenerate] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export default function ContentsInputForm() {
     };
 
   const handleSubmit = async () => {
-    if (!gym || !style) {
+    if (!gym || !style || tryCount === undefined) {
       setError("全ての項目を入力してください。");
       return;
     }
@@ -108,7 +108,7 @@ export default function ContentsInputForm() {
           <Input
             type="number"
             value={tryCount}
-            onChange={(e) => setTryCount(e.target.value)}
+            onChange={(e) => setTryCount(e.target.value ? Number(e.target.value): undefined)}
             className="border rounded px-2 py-1 w-full"
             placeholder="トライ回数を入力してください"
           />
