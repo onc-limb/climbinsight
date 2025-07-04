@@ -16,15 +16,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type ContentRequest struct {
-	SessionId  string `json:"sessionId"`
-	Grade      string `json:"grade"`
-	Gym        string `json:"gym"`
-	Style      string `json:"style"`
-	TryCount   uint   `json:"tryCount"`
-	IsGenerate bool   `json:"isGenerate"`
-}
-
 type Handler struct {
 	generateUsecase *usecase.GenerateUsecase
 	processUsecase  *usecase.ProcessUsecase
@@ -89,12 +80,23 @@ func preseUpdateFile(fh *multipart.FileHeader) (*usecase.UploadFile, error) {
 	}, nil
 }
 
+type ContentRequest struct {
+	SessionId  string `json:"sessionId"`
+	Grade      string `json:"grade"`
+	Gym        string `json:"gym"`
+	Style      string `json:"style"`
+	TryCount   uint   `json:"tryCount"`
+	IsGenerate bool   `json:"isGenerate"`
+}
+
 func (h *Handler) Generate(c *gin.Context) {
 	var req ContentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		utils.RespondError(c, http.StatusBadRequest, "リクエストの読み込みに失敗しました", err)
 		return
 	}
+
+	fmt.Print(req)
 
 	content := usecase.Contents{
 		Grade:    req.Grade,
@@ -167,4 +169,28 @@ func (h *Handler) GetResult(c *gin.Context) {
 			}
 		}
 	}
+}
+
+type InqueryBody struct {
+	Category string `json:"category"`
+	Email    string `json:"email"`
+	Message  string `json:"message"`
+}
+
+func (h *Handler) SendInquery(c *gin.Context) {
+	var req InqueryBody
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.RespondError(c, http.StatusBadRequest, "リクエストの読み込みに失敗しました", err)
+		return
+	}
+
+	formatMessage := fmt.Sprintf(`
+		問い合わせの種類: %s
+		連絡先: %s
+		問い合わせ内容: %s
+	`, req.Category, req.Email, req.Message)
+
+	utils.NoticeToSlack("お問い合わせ", formatMessage)
+
+	c.Status(http.StatusNoContent)
 }

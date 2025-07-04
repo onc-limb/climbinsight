@@ -1,24 +1,32 @@
-'use client';
-import React, { useState } from "react";
-import { useResultStore } from '@/stores/resultStore';
-import { useRouter } from 'next/navigation';
+'use client'
 import { GRADES } from "@/const/grade.const";
+import { useResultStore } from "@/stores/resultStore";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Button } from "../ui/button";
 
 
-export default function TopPage() {
+export default function ContentsInputForm() {
   const router = useRouter();
-  const [grade, setGrade] = useState("V0");
+  const [grade, setGrade] = useState("");
   const [gym, setGym] = useState("");
   const [style, setStyle] = useState("");
-  const [tryCount, setTryCount] = useState(0);
+  const [tryCount, setTryCount] = useState<number| undefined>();
   const [isGenerate, setIsGenerate] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const sessionId = useResultStore.getState().session
 
+  const handleGradeChange = (value: string) => {
+    setGrade(value);
+    };
+
   const handleSubmit = async () => {
-    if (!gym || !style) {
+    if (!gym || !style || tryCount === undefined) {
       setError("全ての項目を入力してください。");
       return;
     }
@@ -44,7 +52,7 @@ export default function TopPage() {
         throw new Error("サーバーとの通信に失敗しました。");
       }
 
-      router.push(`/result?session=${sessionId}`);
+      router.push(`/hold-extraction/result?session=${sessionId}`);
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -55,26 +63,27 @@ export default function TopPage() {
   return (
     <main className="max-w-xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold">ClimbInsight</h1>
-      <p className="text-gray-600">課題の画像をアップロードして課題情報を記録しましょう！</p>
-      <div className="space-y-2">
-        <div>
-          <label className="block text-sm font-medium">グレード</label>
-          <select
-            value={grade}
-            onChange={(e) => setGrade(e.target.value)}
-            className="border rounded px-2 py-1 w-full"
-          >
-            {GRADES.map((grade) => (
-              <option key={grade} value={grade}>
-                {grade}
-              </option>
-            ))}
-          </select>
+      <p className="text-gray-600">課題の情報を入力してハッシュタグを作成しよう！</p>
+      <div className="container mx-auto space-y-4">
+        <div className='space-y-2'>
+          <Label htmlFor="grade" className="block text-sm font-medium">グレード</Label>
+          <Select onValueChange={handleGradeChange} value={grade}>
+            <SelectTrigger id="grade" className="w-full">
+              <SelectValue placeholder="選択してください" />
+            </SelectTrigger>
+            <SelectContent>
+              {GRADES.map((grade) => (
+                <SelectItem key={grade} value={grade}>
+                  {grade}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium">ジム名</label>
-          <input
+          <Label htmlFor="gym" className="block text-sm font-medium">ジム名</Label>
+          <Input
             type="text"
             value={gym}
             onChange={(e) => setGym(e.target.value)}
@@ -84,8 +93,8 @@ export default function TopPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium">課題スタイル</label>
-          <input
+          <Label htmlFor="style" className="block text-sm font-medium">課題スタイル</Label>
+          <Input
             type="text"
             value={style}
             onChange={(e) => setStyle(e.target.value)}
@@ -95,37 +104,37 @@ export default function TopPage() {
         </div>
       </div>
         <div>
-          <label className="block text-sm font-medium">トライ回数</label>
-          <input
+          <Label htmlFor="tryCount" className="block text-sm font-medium">トライ回数</Label>
+          <Input
             type="number"
             value={tryCount}
-            onChange={(e) => setTryCount(Number(e.target.value))}
+            onChange={(e) => setTryCount(e.target.value ? Number(e.target.value): undefined)}
             className="border rounded px-2 py-1 w-full"
             placeholder="トライ回数を入力してください"
           />
         </div>
         <div className="flex items-center space-x-2">
-          <input
+          <Input
             type="checkbox"
             checked={isGenerate}
             onChange={(e) => setIsGenerate(e.target.checked)}
             id="is-generate"
             className="w-4 h-4"
           />
-          <label htmlFor="is-generate" className="text-sm font-medium">
+          <Label htmlFor="is-generate" className="text-sm font-medium">
             SNSの投稿文を自動で生成する
-          </label>
+          </Label>
         </div>
 
       {error && <p className="text-red-600 text-sm">⚠ {error}</p>}
 
-      <button
+      <Button
         onClick={handleSubmit}
         disabled={loading}
         className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-700 disabled:opacity-50"
       >
-        {loading ? "送信中..." : "送信して登録する"}
-      </button>
+        {loading ? "送信中..." : "送信する"}
+      </Button>
     </main>
   );
 }

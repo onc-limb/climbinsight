@@ -81,7 +81,7 @@ export default function TopPage() {
       useResultStore
         .getState()
         .setResult(URL.createObjectURL(image), data.session);
-      router.push("/input");
+      router.push("hold-extraction/input");
     } catch (err) {
       setError((err as Error).message);
     } finally {

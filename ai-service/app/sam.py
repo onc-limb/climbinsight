@@ -91,8 +91,34 @@ def apply_mask_to_image(image: np.ndarray, mask: np.ndarray) -> np.ndarray:
     alpha = np.where(mask, 255, int(255 * bg_alpha)).astype(np.uint8)
     return np.dstack((image, alpha))  # RGB + Alpha
 
-def encode_image(image: np.ndarray) -> bytes:
-    image_pil = Image.fromarray(image)
+def encode_image(image_array: np.ndarray) -> bytes:
+    """
+    NumPy配列の画像をPNG形式のバイナリデータにエンコードする。
+    2次元配列（マスク）と3次元配列（カラー画像）の両方に対応。
+
+    Args:
+        image_array: エンコードするNumPy配列画像。
+                     マスクの場合はbool型 (H, W) または uint8型 (H, W)。
+                     カラー画像の場合はuint8型 (H, W, 3) または (H, W, 4)。
+
+    Returns:
+        PNG形式の画像バイナリデータ。
+    """
+    if image_array.ndim == 2:
+        # 2次元配列の場合（combined_maskなど）
+        # Pillowに渡す前に、bool型であればuint8型に変換し、値を0/255にする
+        if image_array.dtype == bool:
+            image_array = (image_array * 255).astype(np.uint8)
+        # Pillowでグレースケール画像として扱う (mode='L')
+        image_pil = Image.fromarray(image_array, mode='L')
+    elif image_array.ndim == 3:
+        # 3次元配列の場合（カラー画像、RGBA画像）
+        # PillowはRGB/RGBAを自動判別してくれる
+        image_pil = Image.fromarray(image_array)
+    else:
+        # その他の次元の配列はサポートしない
+        raise ValueError("Unsupported image dimensions for encoding. Expected 2D (mask) or 3D (color image).")
+
     buffer = io.BytesIO()
     image_pil.save(buffer, format="PNG")
     return buffer.getvalue()
@@ -112,4 +138,4 @@ def process_image_bytes(image_bytes: bytes, points: List[Coordinate], predictor:
 
     rgba_image = apply_mask_to_image(image, combined_mask)
 
-    return encode_image(rgba_image)
+    return encode_image(rgba_image), encode_image(combined_mask)

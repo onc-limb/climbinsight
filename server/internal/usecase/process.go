@@ -5,6 +5,7 @@ import (
 	"climbinsight/server/internal/domain"
 	"fmt"
 	"path/filepath"
+	"sync"
 )
 
 type ProcessUsecase struct {
@@ -40,16 +41,31 @@ func (pu *ProcessUsecase) Process(file *UploadFile, points []Point, sessionId st
 		domainPoints = append(domainPoints, domain.Point{X: p.X, Y: p.Y})
 	}
 	// AIサービスにリクエスト
-	processedImage, err := pu.imageEditService.Extraction(*file.Data, domainPoints)
+	processedImage, mask_data, err := pu.imageEditService.Extraction(*file.Data, domainPoints)
 	if err != nil {
 		return err
 	}
 
+	var wg sync.WaitGroup
+
 	//画像を保存
+	maskName := fmt.Sprintf("mask/%s.%s", sessionId, filepath.Ext(file.FileName))
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := pu.imageStorageService.UploadImage(bytes.NewReader(mask_data), maskName, "image/png"); err != nil {
+			fmt.Printf("Error uploading mask image: %v\n", err)
+		}
+	}()
+
 	processedName := fmt.Sprintf("processed/%s.%s", sessionId, filepath.Ext(file.FileName))
-	if err := pu.imageStorageService.UploadImage(bytes.NewReader(processedImage), processedName, "image/png"); err != nil {
-		return err
-	}
+	wg.Add(1) // 待機するゴルーチンの数をさらに1増やす
+	go func() {
+		defer wg.Done() // このゴルーチンが完了したら、待機数を1減らす
+		if err := pu.imageStorageService.UploadImage(bytes.NewReader(processedImage), processedName, "image/png"); err != nil {
+			fmt.Printf("Error uploading processed image: %v\n", err)
+		}
+	}()
 
 	url, err := pu.imageStorageService.GeneratePresignedGetURL(processedName, file.ContentType)
 	if err != nil {

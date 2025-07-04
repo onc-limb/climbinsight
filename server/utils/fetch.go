@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 )
@@ -18,7 +17,6 @@ func FetchWithRetry(req *http.Request) (*http.Response, error) {
 	var resp *http.Response
 	var err error
 	for i := range maxRetries {
-		fmt.Printf("request %d times", i)
 		resp, err = client.Do(req)
 		if err == nil && resp.StatusCode == http.StatusOK {
 			return resp, nil
