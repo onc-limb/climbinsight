@@ -1,6 +1,7 @@
 boto3==1.38.3
 fastapi==0.115.12
 mobile_sam @ git+https://github.com/ChaoningZhang/MobileSAM.git@34bbbfdface3c18e5221aa7de6032d7220c6c6a1
+segment_anything @ git+https://github.com/facebookresearch/segment-anything.git@dca509fe793f601edb92606367a655c15ac00fdf
 numpy==2.2.5
 opencv-python-headless==4.11.0.86
 pillow==11.2.1
