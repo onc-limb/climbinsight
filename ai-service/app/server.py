@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from pydantic import BaseModel
 from fastapi import FastAPI, Form, Response, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
-from .sam import load_sam_model, process_image_bytes, Coordinate
+from sam import load_sam_model, process_image_bytes, Coordinate
 
 MAX_MESSAGE_LENGTH = 20 * 1024 * 1024  # 20MB に増やすなど
 
