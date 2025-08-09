@@ -1,13 +1,7 @@
 import json
 import base64
-import os
-import io
 import logging
-from typing import List, Dict, Any
-
-import torch
-import numpy as np
-from PIL import Image
+from typing import Dict, Any
 
 from sam import load_sam_model, process_image_bytes, Coordinate
 

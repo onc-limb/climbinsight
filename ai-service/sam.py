@@ -35,7 +35,7 @@ def load_sam_model():
     # ローカル開発用のフォールバック
     if checkpoint_path is None:
         local_paths = [
-            "/tmp/sam_vit_b.pth",
+            "./tmp/sam_vit_b.pth",
             "./sam_vit_b.pth",
             "../sam_vit_b.pth"
         ]
