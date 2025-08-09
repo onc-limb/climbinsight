@@ -4,44 +4,62 @@ import cv2
 import numpy as np
 import torch
 from segment_anything import sam_model_registry, SamPredictor
-# from mobile_sam import SamPredictor, build_sam_vit_t
 from PIL import Image
 import io
 import os
-import boto3
 
 @dataclass
 class Coordinate:
     x: float
     y: float
 
-def download_model():
-    bucket_name = 'sam-models'
-    object_key = 'sam_vit_b.pth'
-    download_path = '/tmp/sam_vit_b.pth'
-
-    session = boto3.session.Session()
-    s3 = session.client(
-        service_name='s3',
-        aws_access_key_id=os.environ.get('STORAGE_ACCESS_KEY'),
-        aws_secret_access_key=os.environ.get('STORAGE_SECRET_KEY'),
-        endpoint_url=os.environ.get('STORAGE_ENDPOINT'),
-    )
-
-    s3.download_file(bucket_name, object_key, download_path)
-    print(f'Model downloaded to {download_path}')
-
-    return download_path
-
-# モデル読み込み
+# モデル読み込み（SageMaker JumpStart用）
 def load_sam_model():
-    checkpoint = download_model()  # ダウンロードしたモデルファイルのパス
-
+    """
+    Load SAM model for SageMaker JumpStart.
+    The model will be available in /opt/ml/model/ directory in SageMaker.
+    """
+    # SageMakerではモデルファイルは /opt/ml/model/ にある
+    model_dir = "/opt/ml/model"
+    
+    # モデルファイルを探す
+    checkpoint_path = None
+    possible_names = ["sam_vit_b.pth", "model.pth", "pytorch_model.bin"]
+    
+    for name in possible_names:
+        potential_path = os.path.join(model_dir, name)
+        if os.path.exists(potential_path):
+            checkpoint_path = potential_path
+            break
+    
+    # ローカル開発用のフォールバック
+    if checkpoint_path is None:
+        local_paths = [
+            "/tmp/sam_vit_b.pth",
+            "./sam_vit_b.pth",
+            "../sam_vit_b.pth"
+        ]
+        for path in local_paths:
+            if os.path.exists(path):
+                checkpoint_path = path
+                break
+    
+    if checkpoint_path is None:
+        raise FileNotFoundError(
+            "SAM model file not found. Expected locations:\n"
+            f"- SageMaker: {model_dir}/<model_file>\n"
+            f"- Local: {local_paths}"
+        )
+    
+    print(f"Loading SAM model from: {checkpoint_path}")
+    
     # SAM用のコード
     model_type = "vit_b"
-    sam = sam_model_registry[model_type](checkpoint=checkpoint)
-    # sam = build_sam_vit_t(checkpoint=checkpoint)
-    sam.to("cuda" if torch.cuda.is_available() else "cpu")
+    sam = sam_model_registry[model_type](checkpoint=checkpoint_path)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    sam.to(device)
+    
+    print(f"SAM model loaded successfully on device: {device}")
     return SamPredictor(sam)
 
 # バイナリ画像 → numpy array (RGB)

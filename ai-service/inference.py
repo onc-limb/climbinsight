@@ -26,12 +26,8 @@ def model_fn(model_dir: str):
     global predictor
     
     try:
-        logger.info("🧠 Loading SAM model for SageMaker...")
-        
-        # Set environment variables for model loading
-        os.environ.setdefault('STORAGE_ENDPOINT', 'https://your-s3-endpoint')  # Update with actual endpoint
-        os.environ.setdefault('STORAGE_ACCESS_KEY', 'your-access-key')  # Update with actual key
-        os.environ.setdefault('STORAGE_SECRET_KEY', 'your-secret-key')  # Update with actual key
+        logger.info("🧠 Loading SAM model for SageMaker JumpStart...")
+        logger.info(f"Model directory: {model_dir}")
         
         predictor = load_sam_model()
         logger.info("✅ SAM model loaded successfully")
