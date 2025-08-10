@@ -124,36 +124,36 @@ export default function ContactForm() {
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button type="button" disabled={!isFormValid} className='font-bold'>
+            <Button type="button" disabled={!isFormValid} className='font-bold w-full'>
               お問い合わせ内容を確認する
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="w-[95vw] max-w-[425px] p-4 sm:p-6">
             <DialogHeader>
-              <DialogTitle>お問い合わせ内容の確認</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-lg sm:text-xl">お問い合わせ内容の確認</DialogTitle>
+              <DialogDescription className="text-sm sm:text-base">
                 以下の内容で送信します。よろしければ「送信する」ボタンを押してください。
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">カテゴリー:</Label>
-                <span className="col-span-3">{selectedCategoryLabel}</span>
+            <div className="grid gap-3 sm:gap-4 py-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">カテゴリー:</Label>
+                <span className="text-sm sm:text-base">{selectedCategoryLabel}</span>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">メールアドレス:</Label>
-                <span className="col-span-3">{email}</span>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">メールアドレス:</Label>
+                <span className="text-sm sm:text-base break-all">{email}</span>
               </div>
-              <div className="grid grid-cols-4 items-start gap-4">
-                <Label className="text-right">お問い合わせ内容:</Label>
-                <span className="col-span-3 whitespace-pre-wrap">{message}</span>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">お問い合わせ内容:</Label>
+                <span className="text-sm sm:text-base whitespace-pre-wrap break-words">{message}</span>
               </div>
             </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className='font-bold'> 
+            <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-0">
+              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className='font-bold w-full sm:w-auto'> 
                 キャンセル
               </Button>
-              <Button type="button" onClick={handleSubmit} disabled={isSubmitting} className='font-bold'>
+              <Button type="button" onClick={handleSubmit} disabled={isSubmitting} className='font-bold w-full sm:w-auto'>
                 {isSubmitting ? '送信中...' : '送信する'}
               </Button>
             </DialogFooter>

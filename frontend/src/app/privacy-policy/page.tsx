@@ -14,11 +14,11 @@ export default async function TermsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
       <div
         // Tailwind CSSのProseプラグインを使うと、マークダウンから生成されたHTMLに自動でスタイルを適用できます
         // npm install @tailwindcss/typography が必要
-        className="prose max-w-none"
+        className="prose prose-sm sm:prose max-w-none"
         dangerouslySetInnerHTML={{ __html: contentHtml }}
       />
     </div>

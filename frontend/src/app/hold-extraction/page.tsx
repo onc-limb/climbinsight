@@ -91,9 +91,9 @@ export default function TopPage() {
 
   return (
     <>
-      <main className="max-w-2xl mx-auto p-6 space-y-6">
-        <h1 className="text-4xl font-bold">ClimbInsightへようこそ！</h1>
-        <p className="text-xl text-gray-600">
+      <main className="max-w-2xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+        <h1 className="text-2xl sm:text-4xl font-bold">ClimbInsightへようこそ！</h1>
+        <p className="text-lg sm:text-xl text-gray-600">
           壁の写真を選択、ホールドをクリックして、課題のカバー画像を作成しよう
         </p>
 
@@ -128,7 +128,7 @@ export default function TopPage() {
                 width={500}
                 height={400}
                 onClick={handleClick}
-                className="w-full rounded-lg shadow"
+                className="w-full max-w-full rounded-lg shadow cursor-pointer"
               />
               <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
                 {points.map((point, idx) => (
@@ -160,31 +160,31 @@ export default function TopPage() {
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-700 disabled:opacity-50"
+          className="w-full sm:w-auto bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-700 disabled:opacity-50 font-medium"
         >
           {loading ? "送信中..." : "画像を送信する"}
         </button>
-        <h2 className="text-2xl font-bold">✏️ 使い方ガイド</h2>
-        <ul className="list-inside space-y-4">
+        <h2 className="text-xl sm:text-2xl font-bold">✏️ 使い方ガイド</h2>
+        <ul className="list-inside space-y-4 sm:space-y-6">
           <li>
-            <p className="text-lg font-semibold">
+            <p className="text-base sm:text-lg font-semibold">
               1. 課題の写真を選んでください
             </p>
-            <p className="text-gray-700">
+            <p className="text-sm sm:text-base text-gray-700 mt-2">
               壁全体が写っているJPEG / PNG / HEIC
               画像をアップロードしてください。
             </p>
           </li>
           <li>
-            <p className="text-lg font-semibold">
+            <p className="text-base sm:text-lg font-semibold">
               2. 課題のホールドを指定してください
             </p>
-            <p className="text-gray-700">
+            <p className="text-sm sm:text-base text-gray-700 mt-2">
               写真上で、登るホールドをクリックまたはタップしてください。
               <br />
               クリックしたホールドが自動で抽出されます。
             </p>
-            <ul className="list-disc list-inside text-gray-600 text-sm mt-2">
+            <ul className="list-disc list-inside text-gray-600 text-xs sm:text-sm mt-2 ml-4">
               <li>
                 同じホールドをもう一度クリックすると、選択を取り消すことができます。
               </li>
@@ -194,10 +194,10 @@ export default function TopPage() {
             </ul>
           </li>
           <li>
-            <p className="text-lg font-semibold">
+            <p className="text-base sm:text-lg font-semibold">
               3. 「画像を送信する」を押すと、画像が送信されます
             </p>
-            <p className="text-gray-700">
+            <p className="text-sm sm:text-base text-gray-700 mt-2">
               指定したホールド情報を元に、写真を自動で加工します。
               <br />
               加工が完了すると、加工済みの画像と課題情報をダウンロードできるようになります！
