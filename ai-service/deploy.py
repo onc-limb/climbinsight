@@ -1,5 +1,4 @@
 import sagemaker
-from sagemaker import Session
 from sagemaker.serverless import ServerlessInferenceConfig
 from sagemaker.pytorch import PyTorchModel
 import tarfile
@@ -69,7 +68,7 @@ model = PyTorchModel(
 
 # サーバレス設定
 serverless_config = ServerlessInferenceConfig(
-    memory_size_in_mb=4096,
+    memory_size_in_mb=6144,
     max_concurrency=10
 )
 

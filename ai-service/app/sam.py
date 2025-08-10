@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import torch
 from segment_anything import sam_model_registry, SamPredictor
+# from mobile_sam import SamPredictor, build_sam_vit_t
 from PIL import Image
 import io
 import os
