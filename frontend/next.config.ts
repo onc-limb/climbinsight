@@ -5,15 +5,6 @@ const nextConfig: NextConfig = {
   images: {
     domains: ["localhost"], // ← ← ← ここがポイント！
   },
-  async redirects() {
-    return [
-      {
-        source: "/",
-        destination: "/hold-extraction",
-        permanent: false,
-      },
-    ];
-  },
 };
 
 export default nextConfig;
