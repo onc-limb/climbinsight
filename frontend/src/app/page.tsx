@@ -14,17 +14,6 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           {/* Logo Section */}
           <div className="mb-8">
-            <div className="flex justify-center mb-4">
-              <div className="bg-white p-6 rounded-lg shadow-lg border-2 border-orange-200">
-                <Image 
-                  src="/Logo.png" 
-                  alt="KeyRock Logo" 
-                  height={120} 
-                  width={300} 
-                  className="h-16 w-auto sm:h-20" 
-                />
-              </div>
-            </div>
             <h1 className="text-4xl sm:text-6xl font-bold text-orange-900 mb-4">
               ClimbInsight
               <span className="block text-lg sm:text-xl font-normal text-orange-600 mt-2">
@@ -58,6 +47,30 @@ export default function HomePage() {
               </Button>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* KeyRock Service Introduction */}
+      <section className="py-12 sm:py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-orange-900 mb-8">
+            KeyRock~きろく~
+          </h2>
+          <p className="text-xl sm:text-2xl font-bold text-orange-800 mb-8">クライミング記録投稿サービス</p>
+          <div className="bg-orange-50 rounded-lg p-6 sm:p-8 mb-8">
+            <p className="text-lg text-gray-700 mb-4">
+              KeyRockは、あなたのクライミング体験を記録し、他のクライマーと共有するための専門プラットフォームです。
+            </p>
+            <p className="text-base text-gray-600">
+              課題の詳細情報、攻略法、写真、そしてあなたの感想まで、
+              クライミングに関するあらゆる情報を一箇所にまとめて記録・共有できます。
+            </p>
+          </div>
+          <Link href="/keyrock">
+            <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg mb-8">
+              KeyRockを始める
+            </Button>
+          </Link>
         </div>
       </section>
 
@@ -199,48 +212,35 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features Preview Section */}
+      {/* Hold Extraction Feature Section */}
       <section className="py-12 sm:py-16 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-orange-900 mb-12">
-            KeyRockの機能
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-orange-900 mb-8">
+            ClimbSnap
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="bg-orange-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <span className="text-2xl">📸</span>
-              </div>
-              <h3 className="text-xl font-bold text-orange-900 mb-2">画像自動加工</h3>
-              <p className="text-gray-600">
-                写真からホールドを自動抽出し、美しいカバー画像を作成
-              </p>
+          <p className="text-xl sm:text-2xl font-bold text-orange-800 mb-8">ホールド抽出機能</p>
+          <div className="bg-orange-50 rounded-lg p-6 sm:p-8 mb-8">
+            <div className="bg-orange-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+              <span className="text-3xl">🎯</span>
             </div>
-            <div className="text-center">
-              <div className="bg-orange-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <span className="text-2xl">📝</span>
-              </div>
-              <h3 className="text-xl font-bold text-orange-900 mb-2">詳細な記録</h3>
-              <p className="text-gray-600">
-                グレード、攻略法、感想など、詳細な情報を記録可能
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-orange-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <span className="text-2xl">🌐</span>
-              </div>
-              <h3 className="text-xl font-bold text-orange-900 mb-2">コミュニティ</h3>
-              <p className="text-gray-600">
-                他のクライマーと情報を共有し、交流を深めよう
-              </p>
-            </div>
+            <p className="text-lg text-gray-700 mb-4">
+              AI技術を活用したホールド自動抽出機能で、課題の写真から美しいカバー画像を簡単に作成できます。
+            </p>
+            <p className="text-base text-gray-600 mb-4">
+              壁の写真をアップロードし、使用するホールドをクリックするだけ。
+              自動でホールドを認識・抽出し、プロ級のビジュアルを生成します。
+            </p>
+            <ul className="text-sm text-gray-600 text-left max-w-md mx-auto space-y-2">
+              <li>• 簡単操作：写真をアップロード→ホールドをクリック→完成</li>
+              <li>• 高精度：AI技術による正確なホールド認識</li>
+              <li>• 美しい仕上がり：プロ級のビジュアル生成</li>
+            </ul>
           </div>
-          <div className="text-center mt-12">
-            <Link href="/hold-extraction">
-              <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg">
-                今すぐ始める
-              </Button>
-            </Link>
-          </div>
+          <Link href="/hold-extraction">
+            <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg">
+              ホールド抽出を試す
+            </Button>
+          </Link>
         </div>
       </section>
     </main>

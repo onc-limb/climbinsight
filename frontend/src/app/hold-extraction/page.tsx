@@ -92,7 +92,7 @@ export default function TopPage() {
   return (
     <>
       <main className="max-w-2xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
-        <h1 className="text-2xl sm:text-4xl font-bold">ClimbInsightへようこそ！</h1>
+        <h1 className="text-2xl sm:text-4xl font-bold">ClimbSnap</h1>
         <p className="text-lg sm:text-xl text-gray-600">
           壁の写真を選択、ホールドをクリックして、課題のカバー画像を作成しよう
         </p>
