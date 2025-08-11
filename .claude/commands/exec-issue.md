@@ -13,11 +13,11 @@ GitHub issue を読み込み、実装を行なって、PR の作成まで行い�
 下記のワークフローに従って、タスクの実行をしてください。
 
 1. `gh issue $ARGUMENTS`で issue の内容を取得
-2. develop branch にチェックアウトして、`git pull`を行い最新状態を取得する。
-3. default branch から `git switch -c issue/$ARGUMENTS`でブランチを作成
+2. 指定されたブランチにチェックアウトして、`git pull`を行い最新状態を取得する。(指定がない場合は develop branch)
+3. `git switch -c issue/$ARGUMENTS`でブランチを作成
 4. issue の内容に従って実装
 5. 変更を commit & push
-6. default branch 向けの Pull Request を作成
+6. Pull Request を作成
 
 ## 命名規則
 
