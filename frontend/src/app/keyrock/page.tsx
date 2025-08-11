@@ -14,21 +14,10 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           {/* Logo Section */}
           <div className="mb-8">
-            <div className="flex justify-center mb-4">
-              <div className="bg-white p-6 rounded-lg shadow-lg border-2 border-orange-200">
-                <Image 
-                  src="/Logo.png" 
-                  alt="KeyRock Logo" 
-                  height={120} 
-                  width={300} 
-                  className="h-16 w-auto sm:h-20" 
-                />
-              </div>
-            </div>
             <h1 className="text-4xl sm:text-6xl font-bold text-orange-900 mb-4">
-              ClimbInsight
+              KeyRock
               <span className="block text-lg sm:text-xl font-normal text-orange-600 mt-2">
-                〜 クライムインサイト 〜
+                〜 きろく 〜
               </span>
             </h1>
           </div>
@@ -36,10 +25,14 @@ export default function HomePage() {
           {/* Service Description */}
           <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-12 border border-orange-200">
             <h2 className="text-2xl sm:text-3xl font-bold text-orange-900 mb-4">
-              総合クライミングコミュニティサービス
+              クライミング記録投稿サービス
             </h2>
             <p className="text-lg text-gray-700 mb-4">
-              あなたのクライミング体験をもっと楽しく！
+              あなたのクライミング体験を記録し、コミュニティと共有しよう
+            </p>
+            <p className="text-base text-gray-600">
+              課題の写真から自動でホールドを抽出し、美しいカバー画像を作成。<br className="hidden sm:block" />
+              グレード、岩場情報、攻略のコツまで、すべてをまとめて記録できます。
             </p>
           </div>
 
