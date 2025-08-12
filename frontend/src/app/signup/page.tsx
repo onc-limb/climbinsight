@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -60,20 +61,15 @@ export default function SignupPage() {
     <main className="flex-1 bg-gradient-to-br from-orange-50 to-white min-h-screen">
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-md mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-orange-900 mb-2">会員登録</h1>
-            <p className="text-gray-600">ClimbInsightでクライミング記録を始めよう</p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-lg border border-orange-200 p-6">
-            <div className="mb-6 text-center">
-              <h2 className="text-2xl font-bold text-orange-900 mb-2">アカウント作成</h2>
-              <p className="text-gray-600">
+          <Card className="shadow-lg border-orange-200">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl text-orange-900">アカウント作成</CardTitle>
+              <CardDescription>
                 下記の方法でアカウントを作成できます
-              </p>
-            </div>
+              </CardDescription>
+            </CardHeader>
             
-            <div className="space-y-6">
+            <CardContent className="space-y-6">
               {/* Social Login Buttons */}
               <div className="space-y-3">
                 <Button
@@ -164,9 +160,9 @@ export default function SignupPage() {
                   {isLoading ? "作成中..." : "アカウントを作成"}
                 </Button>
               </form>
-            </div>
+            </CardContent>
 
-            <div className="mt-6 space-y-4">
+            <CardFooter className="flex flex-col space-y-4">
               <div className="text-center text-sm text-gray-600">
                 <p>
                   アカウント作成により、
@@ -185,8 +181,8 @@ export default function SignupPage() {
                   </Link>
                 </span>
               </div>
-            </div>
-          </div>
+            </CardFooter>
+          </Card>
         </div>
       </div>
     </main>

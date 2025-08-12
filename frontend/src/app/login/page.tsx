@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -54,20 +55,15 @@ export default function LoginPage() {
     <main className="flex-1 bg-gradient-to-br from-orange-50 to-white min-h-screen">
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-md mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-orange-900 mb-2">ログイン</h1>
-            <p className="text-gray-600">ClimbInsightアカウントにログインしよう</p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-lg border border-orange-200 p-6">
-            <div className="mb-6 text-center">
-              <h2 className="text-2xl font-bold text-orange-900 mb-2">アカウントログイン</h2>
-              <p className="text-gray-600">
+          <Card className="shadow-lg border-orange-200">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl text-orange-900">アカウントログイン</CardTitle>
+              <CardDescription>
                 下記の方法でログインできます
-              </p>
-            </div>
+              </CardDescription>
+            </CardHeader>
             
-            <div className="space-y-6">
+            <CardContent className="space-y-6">
               {/* Social Login Buttons */}
               <div className="space-y-3">
                 <Button
@@ -149,17 +145,17 @@ export default function LoginPage() {
                   {isLoading ? "ログイン中..." : "ログイン"}
                 </Button>
               </form>
-            </div>
 
-            <div className="mt-6 text-center">
-              <span className="text-sm text-gray-600">
-                アカウントをお持ちでないですか？{" "}
-                <Link href="/signup" className="text-orange-600 hover:underline font-medium">
-                  新規登録はこちら
-                </Link>
-              </span>
-            </div>
-          </div>
+              <div className="mt-6 text-center">
+                <span className="text-sm text-gray-600">
+                  アカウントをお持ちでないですか？{" "}
+                  <Link href="/signup" className="text-orange-600 hover:underline font-medium">
+                    新規登録はこちら
+                  </Link>
+                </span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </main>
