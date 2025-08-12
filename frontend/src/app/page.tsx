@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,8 +30,54 @@ export default function HomePage() {
               あなたのクライミング体験をもっと楽しく！
             </p>
           </div>
+        </div>
+      </section>
 
-          {/* Search Section */}
+      {/* Features Preview Section */}
+      <section className="py-12 sm:py-16 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center text-orange-900 mb-12">
+            機能
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="bg-orange-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <span className="text-2xl">📝</span>
+              </div>
+              <h3 className="text-xl font-bold text-orange-900 mb-2">ClimbLog</h3>
+              <p className="text-gray-600">
+                課題の動画、画像、感想などを好きに投稿<br/>ジム名やグレードで検索もできる！
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="bg-orange-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <span className="text-2xl">📸</span>
+              </div>
+              <h3 className="text-xl font-bold text-orange-900 mb-2">ClimbSnap</h3>
+              <p className="text-gray-600">
+                写真からホールドを自動抽出し、カバー画像を作成
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ClimbLog Service Introduction */}
+      <section className="py-12 sm:py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-orange-900 mb-8">
+            ClimbLog
+          </h2>
+          <p className="text-xl sm:text-2xl font-bold text-orange-800 mb-8">クライミング記録投稿サービス</p>
+          <div className="bg-orange-50 rounded-lg p-6 sm:p-8 mb-8">
+            <p className="text-lg text-gray-700 mb-4">
+              ClimbLogは、あなたのクライミング体験を記録し、他のクライマーと共有するための専門プラットフォームです。
+            </p>
+            <p className="text-base text-gray-600">
+              課題の詳細情報、攻略法、写真、そしてあなたの感想まで、
+              クライミングに関するあらゆる情報を一箇所にまとめて記録・共有できます。
+            </p>
+          </div>
           <div className="bg-orange-100 rounded-lg p-6 sm:p-8 mb-12">
             <h3 className="text-xl sm:text-2xl font-bold text-orange-900 mb-4">
               記事を検索
@@ -47,28 +92,9 @@ export default function HomePage() {
               </Button>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* KeyRock Service Introduction */}
-      <section className="py-12 sm:py-16 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-orange-900 mb-8">
-            KeyRock~きろく~
-          </h2>
-          <p className="text-xl sm:text-2xl font-bold text-orange-800 mb-8">クライミング記録投稿サービス</p>
-          <div className="bg-orange-50 rounded-lg p-6 sm:p-8 mb-8">
-            <p className="text-lg text-gray-700 mb-4">
-              KeyRockは、あなたのクライミング体験を記録し、他のクライマーと共有するための専門プラットフォームです。
-            </p>
-            <p className="text-base text-gray-600">
-              課題の詳細情報、攻略法、写真、そしてあなたの感想まで、
-              クライミングに関するあらゆる情報を一箇所にまとめて記録・共有できます。
-            </p>
-          </div>
-          <Link href="/keyrock">
+          <Link href="/climblog">
             <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg mb-8">
-              KeyRockを始める
+              ClimbLogを始める
             </Button>
           </Link>
         </div>
@@ -179,38 +205,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Membership CTA Section */}
-      <section className="py-12 sm:py-16 bg-gradient-to-r from-orange-500 to-orange-600">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 sm:p-8">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              会員登録でもっと楽しく
-            </h2>
-            <p className="text-lg text-orange-100 mb-6">
-              記事の投稿、お気に入り機能、コメント機能など、<br className="hidden sm:block" />
-              さらに充実したクライミングライフを送りませんか？
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button 
-                size="lg" 
-                className="bg-white text-orange-600 hover:bg-orange-50 font-semibold px-8 py-3 text-lg"
-              >
-                無料で会員登録
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="border-white text-white hover:bg-white/10 font-semibold px-8 py-3 text-lg"
-              >
-                ログイン
-              </Button>
-            </div>
-            <p className="text-sm text-orange-100 mt-4">
-              登録は30秒で完了。今すぐあなたのクライミング記録を始めよう！
-            </p>
-          </div>
-        </div>
-      </section>
+      
 
       {/* Hold Extraction Feature Section */}
       <section className="py-12 sm:py-16 bg-white">
@@ -238,9 +233,43 @@ export default function HomePage() {
           </div>
           <Link href="/hold-extraction">
             <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg">
-              ホールド抽出を試す
+              ClimbSnapを試す
             </Button>
           </Link>
+        </div>
+      </section>
+
+      {/* Membership CTA Section */}
+      <section className="py-12 sm:py-16 bg-gradient-to-r from-orange-500 to-orange-600">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 sm:p-8">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              会員登録でもっと楽しく
+            </h2>
+            <p className="text-lg text-orange-100 mb-6">
+              記事の投稿、お気に入り機能、コメント機能など、<br className="hidden sm:block" />
+              さらに充実したクライミングライフを送りませんか？
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button 
+                variant="outline"
+                size="lg" 
+                className="bg-white text-orange-600 hover:bg-white/25 font-semibold px-8 py-3 text-lg"
+              >
+                無料で会員登録
+              </Button>
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="border-white text-orange-600 hover:bg-white/25 font-semibold px-8 py-3 text-lg"
+              >
+                ログイン
+              </Button>
+            </div>
+            <p className="text-sm text-orange-100 mt-4">
+              登録は30秒で完了。今すぐあなたのクライミング記録を始めよう！
+            </p>
+          </div>
         </div>
       </section>
     </main>

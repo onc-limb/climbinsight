@@ -15,9 +15,9 @@ export default function HomePage() {
           {/* Logo Section */}
           <div className="mb-8">
             <h1 className="text-4xl sm:text-6xl font-bold text-orange-900 mb-4">
-              KeyRock
+              ClimbLog
               <span className="block text-lg sm:text-xl font-normal text-orange-600 mt-2">
-                〜 きろく 〜
+                〜 クライムログ 〜
               </span>
             </h1>
           </div>
@@ -118,8 +118,8 @@ export default function HomePage() {
               </div>
             </article>
 
-            {/* Sample Article 4 (hidden on mobile, shown on lg screens) */}
-            <article className="bg-white rounded-lg shadow-lg overflow-hidden border border-orange-200 hover:shadow-xl transition-shadow hidden lg:block">
+            {/* Sample Article 4 */}
+            <article className="bg-white rounded-lg shadow-lg overflow-hidden border border-orange-200 hover:shadow-xl transition-shadow">
               <div className="bg-orange-200 h-48 flex items-center justify-center">
                 <span className="text-orange-700 font-medium">サンプル画像</span>
               </div>
@@ -138,6 +138,25 @@ export default function HomePage() {
             </article>
 
             {/* Sample Article 5 (hidden on mobile, shown on lg screens) */}
+            <article className="bg-white rounded-lg shadow-lg overflow-hidden border border-orange-200 hover:shadow-xl transition-shadow hidden lg:block">
+              <div className="bg-orange-200 h-48 flex items-center justify-center">
+                <span className="text-orange-700 font-medium">サンプル画像</span>
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-bold text-orange-900 mb-2">
+                  ボルダリングのためのトレーニング
+                </h3>
+                <p className="text-gray-600 mb-3">
+                  自宅でできる効果的なトレーニング方法から、岩場での実践まで。
+                </p>
+                <div className="flex justify-between items-center text-sm text-gray-500">
+                  <span>トレーニング</span>
+                  <span>タイプ: ボルダリング</span>
+                </div>
+              </div>
+            </article>
+
+            {/* Sample Article 6 (hidden on mobile, shown on lg screens) */}
             <article className="bg-white rounded-lg shadow-lg overflow-hidden border border-orange-200 hover:shadow-xl transition-shadow hidden lg:block">
               <div className="bg-orange-200 h-48 flex items-center justify-center">
                 <span className="text-orange-700 font-medium">サンプル画像</span>
@@ -188,51 +207,6 @@ export default function HomePage() {
             <p className="text-sm text-orange-100 mt-4">
               登録は30秒で完了。今すぐあなたのクライミング記録を始めよう！
             </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Preview Section */}
-      <section className="py-12 sm:py-16 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-orange-900 mb-12">
-            KeyRockの機能
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="bg-orange-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <span className="text-2xl">📸</span>
-              </div>
-              <h3 className="text-xl font-bold text-orange-900 mb-2">画像自動加工</h3>
-              <p className="text-gray-600">
-                写真からホールドを自動抽出し、美しいカバー画像を作成
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-orange-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <span className="text-2xl">📝</span>
-              </div>
-              <h3 className="text-xl font-bold text-orange-900 mb-2">詳細な記録</h3>
-              <p className="text-gray-600">
-                グレード、攻略法、感想など、詳細な情報を記録可能
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-orange-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <span className="text-2xl">🌐</span>
-              </div>
-              <h3 className="text-xl font-bold text-orange-900 mb-2">コミュニティ</h3>
-              <p className="text-gray-600">
-                他のクライマーと情報を共有し、交流を深めよう
-              </p>
-            </div>
-          </div>
-          <div className="text-center mt-12">
-            <Link href="/hold-extraction">
-              <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg">
-                今すぐ始める
-              </Button>
-            </Link>
           </div>
         </div>
       </section>
