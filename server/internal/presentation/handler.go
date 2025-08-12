@@ -17,13 +17,14 @@ import (
 )
 
 type Handler struct {
-	generateUsecase *usecase.GenerateUsecase
-	processUsecase  *usecase.ProcessUsecase
-	resultUsecase   *usecase.ResultUsecase
+	generateUsecase       *usecase.GenerateUsecase
+	processUsecase        *usecase.ProcessUsecase
+	resultUsecase         *usecase.ResultUsecase
+	searchArticlesUsecase *usecase.SearchArticlesUsecase
 }
 
-func NewHandler(gu *usecase.GenerateUsecase, pu *usecase.ProcessUsecase, ru *usecase.ResultUsecase) *Handler {
-	return &Handler{generateUsecase: gu, processUsecase: pu, resultUsecase: ru}
+func NewHandler(gu *usecase.GenerateUsecase, pu *usecase.ProcessUsecase, ru *usecase.ResultUsecase, sau *usecase.SearchArticlesUsecase) *Handler {
+	return &Handler{generateUsecase: gu, processUsecase: pu, resultUsecase: ru, searchArticlesUsecase: sau}
 }
 
 func (h *Handler) Process(c *gin.Context) {
@@ -193,4 +194,24 @@ func (h *Handler) SendInquery(c *gin.Context) {
 	utils.NoticeToSlack("お問い合わせ", formatMessage)
 
 	c.Status(http.StatusNoContent)
+}
+
+func (h *Handler) SearchArticles(c *gin.Context) {
+	articleType := c.Query("type")
+	place := c.Query("place")
+	keyword := c.Query("keyword")
+
+	articles, err := h.searchArticlesUsecase.Exec(usecase.Conditions{
+		Type:    articleType,
+		Place:   place,
+		Keyword: keyword,
+	})
+	if err != nil {
+		utils.RespondError(c, http.StatusInternalServerError, "記事一覧を取得できませんでした", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"articles": articles,
+	})
 }
