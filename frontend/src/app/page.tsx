@@ -39,7 +39,7 @@ export default function HomePage() {
           <h2 className="text-3xl sm:text-4xl font-bold text-center text-orange-900 mb-12">
             機能
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
             <div className="text-center">
               <div className="bg-orange-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                 <span className="text-2xl">📝</span>

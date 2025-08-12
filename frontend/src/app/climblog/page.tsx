@@ -1,12 +1,13 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { testArticles } from "@/const/testarticle.const";
+import ArticleComponent, { Article } from "@/components/ArticleComponent";
 
 export default function HomePage() {
+  const articles: Article[] = testArticles
   return (
     <main className="flex-1">
       {/* Hero Section */}
@@ -58,122 +59,19 @@ export default function HomePage() {
       <section className="py-12 sm:py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl sm:text-4xl font-bold text-center text-orange-900 mb-12">
-            おすすめの記事
+            新着の記事
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {/* Sample Article 1 */}
-            <article className="bg-white rounded-lg shadow-lg overflow-hidden border border-orange-200 hover:shadow-xl transition-shadow">
-              <div className="bg-orange-200 h-48 flex items-center justify-center">
-                <span className="text-orange-700 font-medium">サンプル画像</span>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-orange-900 mb-2">
-                  小川山の名課題「エイハブ船長」
-                </h3>
-                <p className="text-gray-600 mb-3">
-                  小川山を代表する5.12aの名課題。核心部分の攻略法を詳しく解説します。
-                </p>
-                <div className="flex justify-between items-center text-sm text-gray-500">
-                  <span>グレード: 5.12a</span>
-                  <span>エリア: 小川山</span>
-                </div>
-              </div>
-            </article>
-
-            {/* Sample Article 2 */}
-            <article className="bg-white rounded-lg shadow-lg overflow-hidden border border-orange-200 hover:shadow-xl transition-shadow">
-              <div className="bg-orange-200 h-48 flex items-center justify-center">
-                <span className="text-orange-700 font-medium">サンプル画像</span>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-orange-900 mb-2">
-                  城ヶ崎の初心者向け課題特集
-                </h3>
-                <p className="text-gray-600 mb-3">
-                  海岸沿いの美しいロケーションで楽しめる、初心者にもおすすめの課題をご紹介。
-                </p>
-                <div className="flex justify-between items-center text-sm text-gray-500">
-                  <span>グレード: 5.8-5.10</span>
-                  <span>エリア: 城ヶ崎</span>
-                </div>
-              </div>
-            </article>
-
-            {/* Sample Article 3 */}
-            <article className="bg-white rounded-lg shadow-lg overflow-hidden border border-orange-200 hover:shadow-xl transition-shadow">
-              <div className="bg-orange-200 h-48 flex items-center justify-center">
-                <span className="text-orange-700 font-medium">サンプル画像</span>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-orange-900 mb-2">
-                  御岳の岩場ガイド完全版
-                </h3>
-                <p className="text-gray-600 mb-3">
-                  関東屈指のクライミングエリア御岳。アクセスから課題情報まで完全ガイド。
-                </p>
-                <div className="flex justify-between items-center text-sm text-gray-500">
-                  <span>グレード: 5.6-5.13</span>
-                  <span>エリア: 御岳</span>
-                </div>
-              </div>
-            </article>
-
-            {/* Sample Article 4 */}
-            <article className="bg-white rounded-lg shadow-lg overflow-hidden border border-orange-200 hover:shadow-xl transition-shadow">
-              <div className="bg-orange-200 h-48 flex items-center justify-center">
-                <span className="text-orange-700 font-medium">サンプル画像</span>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-orange-900 mb-2">
-                  冬場のクライミング装備術
-                </h3>
-                <p className="text-gray-600 mb-3">
-                  寒い季節でも安全にクライミングを楽しむための装備とテクニックを解説。
-                </p>
-                <div className="flex justify-between items-center text-sm text-gray-500">
-                  <span>装備・テクニック</span>
-                  <span>シーズン: 冬</span>
-                </div>
-              </div>
-            </article>
-
-            {/* Sample Article 5 (hidden on mobile, shown on lg screens) */}
-            <article className="bg-white rounded-lg shadow-lg overflow-hidden border border-orange-200 hover:shadow-xl transition-shadow hidden lg:block">
-              <div className="bg-orange-200 h-48 flex items-center justify-center">
-                <span className="text-orange-700 font-medium">サンプル画像</span>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-orange-900 mb-2">
-                  ボルダリングのためのトレーニング
-                </h3>
-                <p className="text-gray-600 mb-3">
-                  自宅でできる効果的なトレーニング方法から、岩場での実践まで。
-                </p>
-                <div className="flex justify-between items-center text-sm text-gray-500">
-                  <span>トレーニング</span>
-                  <span>タイプ: ボルダリング</span>
-                </div>
-              </div>
-            </article>
-
-            {/* Sample Article 6 (hidden on mobile, shown on lg screens) */}
-            <article className="bg-white rounded-lg shadow-lg overflow-hidden border border-orange-200 hover:shadow-xl transition-shadow hidden lg:block">
-              <div className="bg-orange-200 h-48 flex items-center justify-center">
-                <span className="text-orange-700 font-medium">サンプル画像</span>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-orange-900 mb-2">
-                  ボルダリングのためのトレーニング
-                </h3>
-                <p className="text-gray-600 mb-3">
-                  自宅でできる効果的なトレーニング方法から、岩場での実践まで。
-                </p>
-                <div className="flex justify-between items-center text-sm text-gray-500">
-                  <span>トレーニング</span>
-                  <span>タイプ: ボルダリング</span>
-                </div>
-              </div>
-            </article>
+            {articles.map((article) => (
+                <ArticleComponent 
+                            key={article.id}
+                            article={article}
+                            onClick={() => {
+                              // TODO: 記事詳細ページへの遷移処理を実装
+                              console.log(`記事 ${article.id} がクリックされました`);
+                            }}
+                          />
+                        ))}
           </div>
         </div>
       </section>
