@@ -28,13 +28,15 @@ func main() {
 	tgs := infra.NewTextGenerateService()
 	sh, _ := infra.NewimageStorageService()
 	ts, _ := infra.NewSessionStoreService()
+	aqs := infra.NewArticleQueryService()
 
 	// ユースケース群作成
 	gu := usecase.NewGenerateUsecase(tgs, ts)
 	pu := usecase.NewProcessUsecase(ies, sh, ts)
 	ru := usecase.NewResultUsecase(ts)
+	sau := usecase.NewSearchArticlesUsecase(aqs)
 
-	h := presentation.NewHandler(gu, pu, ru)
+	h := presentation.NewHandler(gu, pu, ru, sau)
 
 	r := gin.Default()
 
@@ -61,6 +63,9 @@ func main() {
 
 	contents := r.Group("/contents")
 	contents.POST("/generate", h.Generate)
+
+	articles := r.Group("/articles")
+	articles.GET("/", h.SearchArticles)
 
 	r.Run(":8080")
 }
