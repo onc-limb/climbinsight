@@ -2,6 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
 
 import { useState } from 'react';
 
@@ -68,8 +69,17 @@ export default function Header() {
         </div>
 
         {/* Desktop Right Section */}
-        <div className="hidden md:block w-auto" style={{ minWidth: '100px' }}>
-          {/* ここにログイン/会員登録ボタンが入ります */}
+        <div className="hidden md:flex space-x-4 w-auto" style={{ minWidth: '200px' }}>
+          <Link href="/login">
+            <Button variant="outline" className="border-orange-600 text-orange-600 hover:bg-orange-50">
+              ログイン
+            </Button>
+          </Link>
+          <Link href="/signup">
+            <Button className="bg-orange-600 text-white hover:bg-orange-700">
+              会員登録
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile Hamburger Menu Button */}
@@ -157,6 +167,20 @@ export default function Header() {
           >
             お問い合わせ
           </Link>
+          
+          {/* Mobile Auth Buttons */}
+          <div className="px-3 py-2 space-y-2">
+            <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
+              <Button variant="outline" className="w-full border-orange-600 text-orange-600 hover:bg-orange-50">
+                ログイン
+              </Button>
+            </Link>
+            <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+              <Button className="w-full bg-orange-600 text-white hover:bg-orange-700">
+                会員登録
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </header>
