@@ -30,20 +30,33 @@ export default function HomePage() {
               あなたのクライミング体験をもっと楽しく！
             </p>
           </div>
+        </div>
+      </section>
 
-          {/* Search Section */}
-          <div className="bg-orange-100 rounded-lg p-6 sm:p-8 mb-12">
-            <h3 className="text-xl sm:text-2xl font-bold text-orange-900 mb-4">
-              記事を検索
-            </h3>
-            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <Input 
-                placeholder="岩場名、グレード、エリアなど..." 
-                className="flex-1"
-              />
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white px-6">
-                検索
-              </Button>
+      {/* Features Preview Section */}
+      <section className="py-12 sm:py-16 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center text-orange-900 mb-12">
+            機能
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="bg-orange-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <span className="text-2xl">📝</span>
+              </div>
+              <h3 className="text-xl font-bold text-orange-900 mb-2">ClimbLog</h3>
+              <p className="text-gray-600">
+                課題の動画、画像、感想などを好きに投稿<br/>ジム名やグレードで検索もできる！
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="bg-orange-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <span className="text-2xl">📸</span>
+              </div>
+              <h3 className="text-xl font-bold text-orange-900 mb-2">ClimbSnap</h3>
+              <p className="text-gray-600">
+                写真からホールドを自動抽出し、カバー画像を作成
+              </p>
             </div>
           </div>
         </div>
@@ -64,6 +77,20 @@ export default function HomePage() {
               課題の詳細情報、攻略法、写真、そしてあなたの感想まで、
               クライミングに関するあらゆる情報を一箇所にまとめて記録・共有できます。
             </p>
+          </div>
+          <div className="bg-orange-100 rounded-lg p-6 sm:p-8 mb-12">
+            <h3 className="text-xl sm:text-2xl font-bold text-orange-900 mb-4">
+              記事を検索
+            </h3>
+            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <Input 
+                placeholder="岩場名、グレード、エリアなど..." 
+                className="flex-1"
+              />
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white px-6">
+                検索
+              </Button>
+            </div>
           </div>
           <Link href="/climblog">
             <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg mb-8">
@@ -206,7 +233,7 @@ export default function HomePage() {
           </div>
           <Link href="/hold-extraction">
             <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg">
-              ホールド抽出を試す
+              ClimbSnapを試す
             </Button>
           </Link>
         </div>
@@ -225,15 +252,16 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button 
+                variant="outline"
                 size="lg" 
-                className="bg-white text-orange-600 hover:bg-orange-50 font-semibold px-8 py-3 text-lg"
+                className="bg-white text-orange-600 hover:bg-white/25 font-semibold px-8 py-3 text-lg"
               >
                 無料で会員登録
               </Button>
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="border-white text-white hover:bg-white/10 font-semibold px-8 py-3 text-lg"
+                className="border-white text-orange-600 hover:bg-white/25 font-semibold px-8 py-3 text-lg"
               >
                 ログイン
               </Button>

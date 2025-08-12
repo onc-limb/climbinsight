@@ -210,51 +210,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Features Preview Section */}
-      <section className="py-12 sm:py-16 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-orange-900 mb-12">
-            KeyRockの機能
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="bg-orange-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <span className="text-2xl">📸</span>
-              </div>
-              <h3 className="text-xl font-bold text-orange-900 mb-2">画像自動加工</h3>
-              <p className="text-gray-600">
-                写真からホールドを自動抽出し、美しいカバー画像を作成
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-orange-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <span className="text-2xl">📝</span>
-              </div>
-              <h3 className="text-xl font-bold text-orange-900 mb-2">詳細な記録</h3>
-              <p className="text-gray-600">
-                グレード、攻略法、感想など、詳細な情報を記録可能
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-orange-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <span className="text-2xl">🌐</span>
-              </div>
-              <h3 className="text-xl font-bold text-orange-900 mb-2">コミュニティ</h3>
-              <p className="text-gray-600">
-                他のクライマーと情報を共有し、交流を深めよう
-              </p>
-            </div>
-          </div>
-          <div className="text-center mt-12">
-            <Link href="/hold-extraction">
-              <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg">
-                今すぐ始める
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
     </main>
   );
 }
