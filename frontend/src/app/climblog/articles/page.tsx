@@ -80,7 +80,7 @@ export default function ArticlesPage() {
       <section className="bg-gradient-to-b from-orange-50 to-white py-8 sm:py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-center text-orange-900 mb-8">
-            記事検索
+            記事一覧
           </h1>
           
           {/* Current Search Conditions */}
@@ -96,7 +96,7 @@ export default function ArticlesPage() {
           {/* Search Form */}
           <div className="bg-orange-100 rounded-lg p-6 sm:p-8 mb-8">
             <h3 className="text-xl sm:text-2xl font-bold text-orange-900 mb-4">
-              新しい検索
+              再検索
             </h3>
             <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
               <Input 
