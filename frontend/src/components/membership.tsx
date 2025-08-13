@@ -1,6 +1,27 @@
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
+import { getSession } from "@/lib/supabaseClient";
 
 export default function Membership() {
+    const [hasSession, setHasSession] = useState(false);
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+    const fetchSession = async () => {
+      // Supabaseからセッション情報を取得
+      const session = await getSession();
+      setHasSession(!!session);
+      setLoading(false);
+    };
+
+    fetchSession();
+  }, []);
+  if (loading) {
+    return null; // またはローディングスピナーなどを表示
+  }
+
+  if (hasSession) {
+    return null;
+  }
     return (
       <section className="py-12 sm:py-16 bg-gradient-to-r from-orange-500 to-orange-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
