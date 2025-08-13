@@ -2,28 +2,40 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { signIn } from "@/lib/supabaseClient";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     setIsLoading(true);
+    setError("");
     
     try {
-      // TODO: Supabase auth implementation
-      console.log("Email login:", { email, password });
-      alert("ログイン機能は実装中です");
+      const { data, error: signInError } = await signIn({ email, password });
+      
+      if (signInError) {
+        setError("メールアドレスまたはパスワードが正しくありません");
+        return;
+      }
+      
+      if (data.user) {
+        router.push("/profile");
+      }
     } catch (error) {
       console.error("Login error:", error);
-      alert("ログインに失敗しました");
+      setError("ログインに失敗しました。もう一度お試しください。");
     } finally {
       setIsLoading(false);
     }
@@ -37,17 +49,6 @@ export default function LoginPage() {
     } catch (error) {
       console.error("Google login error:", error);
       alert("Google認証に失敗しました");
-    }
-  };
-
-  const handleLineLogin = async () => {
-    try {
-      // TODO: LINE auth implementation
-      console.log("LINE login");
-      alert("LINE認証は実装中です");
-    } catch (error) {
-      console.error("LINE login error:", error);
-      alert("LINE認証に失敗しました");
     }
   };
 
@@ -80,18 +81,6 @@ export default function LoginPage() {
                   </svg>
                   Googleでログイン
                 </Button>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full h-12 border-green-500 text-green-600 hover:bg-green-50"
-                  onClick={handleLineLogin}
-                >
-                  <svg className="w-5 h-5 mr-2" fill="#00C300" viewBox="0 0 24 24">
-                    <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.628-.629.628M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
-                  </svg>
-                  LINEでログイン
-                </Button>
               </div>
 
               <div className="relative">
@@ -105,6 +94,12 @@ export default function LoginPage() {
 
               {/* Email Form */}
               <form onSubmit={handleEmailLogin} className="space-y-4">
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                    {error}
+                  </div>
+                )}
+                
                 <div className="space-y-2">
                   <Label htmlFor="email">メールアドレス</Label>
                   <Input
