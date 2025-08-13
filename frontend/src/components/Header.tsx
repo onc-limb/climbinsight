@@ -4,7 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getCurrentUser, signOut } from '@/lib/supabaseClient';
+import { User } from '@supabase/supabase-js';
 
 // shadcn/ui の DropdownMenu コンポーネントをインポート
 import {
@@ -17,6 +19,20 @@ import {
 export default function Header() {
   const [isFeaturesMenuOpen, setIsFeaturesMenuOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const currentUser = await getCurrentUser()
+      setUser(currentUser)
+    }
+    checkUser()
+  }, [])
+
+  const handleSignOut = async () => {
+    await signOut()
+    setUser(null)
+  }
 
   return (
     <header className="bg-orange-200 shadow text-orange-900">
@@ -70,16 +86,40 @@ export default function Header() {
 
         {/* Desktop Right Section */}
         <div className="hidden md:flex space-x-4 w-auto" style={{ minWidth: '200px' }}>
-          <Link href="/login">
-            <Button variant="outline" className="border-orange-600 text-orange-600 hover:bg-orange-50">
-              ログイン
-            </Button>
-          </Link>
-          <Link href="/signup">
-            <Button className="bg-orange-600 text-white hover:bg-orange-700">
-              会員登録
-            </Button>
-          </Link>
+          {user ? (
+            <>
+              <Link href="/profile">
+                <Button variant="outline" className="border-orange-600 text-orange-600 hover:bg-orange-50">
+                  プロフィール
+                </Button>
+              </Link>
+              <Link href="/post">
+                <Button className="bg-orange-600 text-white hover:bg-orange-700">
+                  記事投稿
+                </Button>
+              </Link>
+              <Button 
+                variant="outline" 
+                className="border-gray-400 text-gray-600 hover:bg-gray-50"
+                onClick={handleSignOut}
+              >
+                ログアウト
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button variant="outline" className="border-orange-600 text-orange-600 hover:bg-orange-50">
+                  ログイン
+                </Button>
+              </Link>
+              <Link href="/signup">
+                <Button className="bg-orange-600 text-white hover:bg-orange-700">
+                  会員登録
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Hamburger Menu Button */}
@@ -170,16 +210,43 @@ export default function Header() {
           
           {/* Mobile Auth Buttons */}
           <div className="px-3 py-2 space-y-2">
-            <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
-              <Button variant="outline" className="w-full border-orange-600 text-orange-600 hover:bg-orange-50">
-                ログイン
-              </Button>
-            </Link>
-            <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)}>
-              <Button className="w-full bg-orange-600 text-white hover:bg-orange-700">
-                会員登録
-              </Button>
-            </Link>
+            {user ? (
+              <>
+                <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full border-orange-600 text-orange-600 hover:bg-orange-50">
+                    プロフィール
+                  </Button>
+                </Link>
+                <Link href="/post" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button className="w-full bg-orange-600 text-white hover:bg-orange-700">
+                    記事投稿
+                  </Button>
+                </Link>
+                <Button 
+                  variant="outline" 
+                  className="w-full border-gray-400 text-gray-600 hover:bg-gray-50"
+                  onClick={() => {
+                    handleSignOut()
+                    setIsMobileMenuOpen(false)
+                  }}
+                >
+                  ログアウト
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full border-orange-600 text-orange-600 hover:bg-orange-50">
+                    ログイン
+                  </Button>
+                </Link>
+                <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button className="w-full bg-orange-600 text-white hover:bg-orange-700">
+                    会員登録
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -11,3 +11,21 @@ export const signUp = async (input: { email: string; password: string }) => {
     password: input.password,
   });
 };
+
+export const signIn = async (input: { email: string; password: string }) => {
+  return await supabase.auth.signInWithPassword({
+    email: input.email,
+    password: input.password,
+  });
+};
+
+export const signOut = async () => {
+  return await supabase.auth.signOut();
+};
+
+export const getCurrentUser = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
+};
+
+export default supabase;
