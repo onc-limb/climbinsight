@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { createClient } from "@supabase/supabase-js";
+import Image from "next/image";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
@@ -27,6 +28,7 @@ export default function ProfileEditPage() {
   const [homeGym, setHomeGym] = useState("");
   const [climbingExperience, setClimbingExperience] = useState("");
   const [introduction, setIntroduction] = useState("");
+  const [iconPreview, setIconPreview] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -45,7 +47,9 @@ export default function ProfileEditPage() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setIconImage(e.target.files[0]);
+      const file = e.target.files[0];
+      setIconImage(file);
+      setIconPreview(URL.createObjectURL(file));
     }
   };
 
@@ -97,6 +101,7 @@ export default function ProfileEditPage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="displayName">表示名 <span className="text-red-500">*</span></Label>
+                  <p className="text-sm text-gray-500">他のユーザーに公開される名前です</p>
                   <Input
                     id="displayName"
                     type="text"
@@ -110,13 +115,39 @@ export default function ProfileEditPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="iconImage">アイコン画像</Label>
-                  <Input
-                    id="iconImage"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="border-orange-200 focus:border-orange-400"
-                  />
+                  <div className="flex items-center gap-4">
+                    <label htmlFor="iconImage" className="w-40 cursor-pointer">
+                      <div className="h-10 w-full rounded-md bg-gray-200 px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300 text-center">
+                        ファイルを選択
+                      </div>
+                      <Input
+                        id="iconImage"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="sr-only"
+                      />
+                    </label>
+                    {iconPreview ? (
+                      <Image
+                        src={iconPreview}
+                        alt="Icon preview"
+                        height={112}
+                        width={112}
+                        className="h-28 w-28 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-28 w-28 rounded-full bg-gray-200 flex items-center justify-center">
+                        <svg
+                          className="h-24 w-16 text-gray-400"
+                          fill="currentColor"
+                          viewBox="0 3 24 24"
+                        >
+                          <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -159,26 +190,26 @@ export default function ProfileEditPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="homeGym">ホームジム</Label>
+                    <Label htmlFor="climbingExperience">クライミング歴(年)</Label>
                     <Input
-                      id="homeGym"
-                      type="text"
-                      placeholder="クライミングジム名"
-                      value={homeGym}
-                      onChange={(e) => setHomeGym(e.target.value)}
+                      id="climbingExperience"
+                      type="number"
+                      placeholder="3"
+                      value={climbingExperience}
+                      onChange={(e) => setClimbingExperience(e.target.value)}
                       className="border-orange-200 focus:border-orange-400"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="climbingExperience">クライミング歴</Label>
+                  <Label htmlFor="homeGym">ホームジム</Label>
                   <Input
-                    id="climbingExperience"
+                    id="homeGym"
                     type="text"
-                    placeholder="例: 3年"
-                    value={climbingExperience}
-                    onChange={(e) => setClimbingExperience(e.target.value)}
+                    placeholder="クライミングジム名"
+                    value={homeGym}
+                    onChange={(e) => setHomeGym(e.target.value)}
                     className="border-orange-200 focus:border-orange-400"
                   />
                 </div>
