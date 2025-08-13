@@ -28,7 +28,7 @@ export default function SignupPage() {
     
     try {
       // TODO: Supabase auth implementation
-      const { data, error } = await signUp({
+      const { error } = await signUp({
         email: email,
         password: password,
       });
