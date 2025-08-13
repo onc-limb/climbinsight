@@ -104,10 +104,6 @@ export default function ArticlesPage() {
               <ArticleComponent 
                 key={article.id}
                 article={article}
-                onClick={() => {
-                  // TODO: 記事詳細ページへの遷移処理を実装
-                  console.log(`記事 ${article.id} がクリックされました`);
-                }}
               />
             ))}
           </div>
