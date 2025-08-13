@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Button } from "./ui/button";
 import { getSession } from "@/lib/supabaseClient";
 
@@ -35,20 +36,24 @@ export default function Membership() {
               さらに充実したクライミングライフを送りませんか？
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button
-                variant="outline"
-                size="lg"
-                className="bg-white text-orange-600 hover:bg-white/25 font-semibold px-8 py-3 text-lg"
-              >
-                無料で会員登録
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-white text-orange-600 hover:bg-white/25 font-semibold px-8 py-3 text-lg"
-              >
-                ログイン
-              </Button>
+              <Link href="/signup">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="bg-white text-orange-600 hover:bg-white/25 font-semibold px-8 py-3 text-lg"
+                >
+                  無料で会員登録
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="border-white text-orange-600 hover:bg-white/25 font-semibold px-8 py-3 text-lg"
+                >
+                  ログイン
+                </Button>
+              </Link>
             </div>
             <p className="text-sm text-orange-100 mt-4">
               登録は30秒で完了。今すぐあなたのクライミング記録を始めよう！
