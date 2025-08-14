@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ArticleComponent, { type Article } from "@/components/ArticleComponent";
 import { testArticles } from "@/const/testarticle.const";
-import Membership from "@/components/membership";
+import Membership from "@/components/client/membership";
 
 export default function ArticlesPage() {
   const [searchQuery, setSearchQuery] = useState("");

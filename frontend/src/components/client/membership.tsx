@@ -1,6 +1,8 @@
+'use client'
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { getSession } from "@/lib/supabaseClient";
 
 export default function Membership() {

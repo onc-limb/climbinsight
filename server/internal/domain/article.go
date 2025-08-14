@@ -11,6 +11,7 @@ const (
 )
 
 type ArticleOverviewReadModel struct {
+	Id        string
 	Title     string
 	Overview  string
 	ImagePath string

@@ -1,8 +1,18 @@
 import ArticleComponent, { Article } from "@/components/ArticleComponent";
-import { testArticles } from "@/const/testarticle.const";
 
-export default function RecommendedArticles() {
-  const articles: Article[] = testArticles.slice(0, 3);
+export default async function RecommendedArticles() {
+  const res = await fetch(`${process.env.API_URL}/articles`)
+  const data = await res.json()
+  
+  // /apiに隠蔽したい
+  const articles: Article[] = data.articles.map((article) => ({
+    id: article.Id,
+    title: article.Title,
+    coverImage: article.ImagePath,
+    tags: article.Tags,
+    postedDate: article.PublishAt,
+    description: article.Overview
+  }))
 
   return (
     <section className="py-12 sm:py-16 bg-gray-50">

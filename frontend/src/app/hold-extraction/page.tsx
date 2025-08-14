@@ -3,7 +3,7 @@ import Image from "next/image";
 import React, { useRef, useState } from "react";
 import { useResultStore } from "@/stores/resultStore";
 import { useRouter } from "next/navigation";
-import Membership from "@/components/membership";
+import Membership from "@/components/client/membership";
 
 type Point = { x: number; y: number };
 
