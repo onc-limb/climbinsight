@@ -1,7 +1,7 @@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import SocialLoginButtons from "@/components/client/auth/SocialLoginButtons";
 import SignupForm from "@/components/client/auth/SignupForm";
-import SignupFooter from "@/components/SignupFooter";
+import SignupFooter from "@/components/client/auth/SignupFooter";
 
 export default function SignupPage() {
 
