@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { testArticles } from '@/const/testarticle.const'
 import type { Article } from '@/components/ArticleComponent'
 import ArticleLikeButton from '@/components/client/ArticleLikeButton'
+import ArticleLikeDisplay from '@/components/client/ArticleLikeDisplay'
 import ArticleComments, { type Comment } from '@/components/client/ArticleComments'
 import WithLogined from '@/components/client/WithLogined'
 
@@ -156,13 +157,24 @@ export default async function ArticleDetailPage({ params }: { params: { id: stri
           </div>
         </div>
 
-        {/* Like Button - Client Component */}
-        <ArticleLikeButton 
-          initialLikes={article.likes}
-          initialIsLiked={article.isLiked}
-        />
+        {/* Like Section */}
+        <WithLogined
+          fallback={
+            <ArticleLikeDisplay likes={article.likes} />
+          }
+          loading={
+            <div className="mb-8 pb-8 border-b border-gray-200">
+              <div className="text-center text-gray-500">認証状態を確認中...</div>
+            </div>
+          }
+        >
+          <ArticleLikeButton 
+            initialLikes={article.likes}
+            initialIsLiked={article.isLiked}
+          />
+        </WithLogined>
 
-        {/* Comments Section - Client Component with Authentication Check */}
+        {/* Comments Section */}
         <WithLogined
           fallback={
             <div className="text-center py-8">
