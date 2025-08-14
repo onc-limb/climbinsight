@@ -13,10 +13,9 @@ export interface Comment {
 
 interface ArticleCommentsProps {
   initialComments: Comment[]
-  isLoggedIn: boolean
 }
 
-export default function ArticleComments({ initialComments, isLoggedIn }: ArticleCommentsProps) {
+export default function ArticleComments({ initialComments }: ArticleCommentsProps) {
   const [comments, setComments] = useState<Comment[]>(initialComments)
   const [newComment, setNewComment] = useState('')
 
@@ -41,16 +40,6 @@ export default function ArticleComments({ initialComments, isLoggedIn }: Article
       month: 'long',
       day: 'numeric'
     })
-  }
-
-  if (!isLoggedIn) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-gray-500 mb-4">
-          コメントを投稿するには<Button variant="link" className="text-orange-500 p-0">ログイン</Button>してください。
-        </p>
-      </div>
-    )
   }
 
   return (

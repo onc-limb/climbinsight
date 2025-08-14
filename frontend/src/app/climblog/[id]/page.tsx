@@ -1,9 +1,11 @@
 import Image from 'next/image'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { testArticles } from '@/const/testarticle.const'
 import type { Article } from '@/components/ArticleComponent'
 import ArticleLikeButton from '@/components/client/ArticleLikeButton'
 import ArticleComments, { type Comment } from '@/components/client/ArticleComments'
+import WithLogined from '@/components/client/WithLogined'
 
 interface DetailedArticle extends Article {
   content: string
@@ -74,16 +76,9 @@ ${baseArticle.description}
   }
 }
 
-// ログイン状態をチェックする関数（実際の実装では認証サービスを使用）
-function checkLoginStatus(): boolean {
-  // TODO: 実際の認証ロジックを実装
-  return Math.random() > 0.5
-}
-
 export default async function ArticleDetailPage({ params }: { params: { id: string } }) {
   const id = parseInt(params.id, 10)
   const article = getArticleData(id)
-  const isLoggedIn = checkLoginStatus()
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -167,11 +162,27 @@ export default async function ArticleDetailPage({ params }: { params: { id: stri
           initialIsLiked={article.isLiked}
         />
 
-        {/* Comments Section - Client Component */}
-        <ArticleComments 
-          initialComments={article.comments}
-          isLoggedIn={isLoggedIn}
-        />
+        {/* Comments Section - Client Component with Authentication Check */}
+        <WithLogined
+          fallback={
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">
+                コメントを投稿するには
+                <Button variant="link" className="text-orange-500 p-0 mx-1">
+                  ログイン
+                </Button>
+                してください。
+              </p>
+            </div>
+          }
+          loading={
+            <div className="text-center py-8">
+              <p className="text-gray-500">認証状態を確認中...</p>
+            </div>
+          }
+        >
+          <ArticleComments initialComments={article.comments} />
+        </WithLogined>
       </article>
     </main>
   )
