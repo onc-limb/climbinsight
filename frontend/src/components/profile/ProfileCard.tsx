@@ -11,10 +11,9 @@ interface ProfileData {
 
 interface ProfileCardProps {
   profileData: ProfileData;
-  userEmail: string;
 }
 
-export default function ProfileCard({ profileData, userEmail }: ProfileCardProps) {
+export default function ProfileCard({ profileData }: ProfileCardProps) {
   return (
     <Card className="shadow-lg border-orange-200">
       <CardContent className="p-6">
@@ -46,9 +45,6 @@ export default function ProfileCard({ profileData, userEmail }: ProfileCardProps
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             {profileData.displayName}
           </h2>
-          
-          {/* Email */}
-          <p className="text-gray-600 mb-4">{userEmail}</p>
           
           {/* Stats */}
           <div className="space-y-3">
