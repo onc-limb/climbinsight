@@ -1,4 +1,3 @@
-'use client';
 import React from "react";
 import ContentsInputForm from "@/components/client/contents-input-form";
 

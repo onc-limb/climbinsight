@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
-import LoginForm from "@/components/auth/LoginForm";
+import SocialLoginButtons from "@/components/client/auth/SocialLoginButtons";
+import LoginForm from "@/components/client/auth/LoginForm";
 
 export default function LoginPage() {
   return (
