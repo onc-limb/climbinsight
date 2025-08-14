@@ -7,6 +7,7 @@ import ArticleLikeButton from '@/components/client/ArticleLikeButton'
 import ArticleLikeDisplay from '@/components/client/ArticleLikeDisplay'
 import ArticleComments, { type Comment } from '@/components/client/ArticleComments'
 import WithLogined from '@/components/client/WithLogined'
+import Link from 'next/link'
 
 interface DetailedArticle extends Article {
   content: string
@@ -157,35 +158,22 @@ export default async function ArticleDetailPage({ params }: { params: { id: stri
           </div>
         </div>
 
-        {/* Like Section */}
         <WithLogined
           fallback={
-            <ArticleLikeDisplay likes={article.likes} />
-          }
-          loading={
-            <div className="mb-8 pb-8 border-b border-gray-200">
-              <div className="text-center text-gray-500">認証状態を確認中...</div>
-            </div>
-          }
-        >
-          <ArticleLikeButton 
-            initialLikes={article.likes}
-            initialIsLiked={article.isLiked}
-          />
-        </WithLogined>
-
-        {/* Comments Section */}
-        <WithLogined
-          fallback={
-            <div className="text-center py-8">
-              <p className="text-gray-500 mb-4">
-                コメントを投稿するには
-                <Button variant="link" className="text-orange-500 p-0 mx-1">
-                  ログイン
-                </Button>
-                してください。
-              </p>
-            </div>
+            <>
+              <ArticleLikeDisplay likes={article.likes} />
+              <div className="text-center py-8">
+                <p className="text-gray-500 mb-4">
+                  いいねやコメントをするには
+                  <Link href="/login">
+                  <Button variant="link" className="text-orange-500 p-0 mx-1">
+                    ログイン
+                  </Button>
+                  </Link>
+                  してください。
+                </p>
+              </div>
+            </>
           }
           loading={
             <div className="text-center py-8">
@@ -193,6 +181,10 @@ export default async function ArticleDetailPage({ params }: { params: { id: stri
             </div>
           }
         >
+          <ArticleLikeButton 
+            initialLikes={article.likes}
+            initialIsLiked={article.isLiked}
+          />
           <ArticleComments initialComments={article.comments} />
         </WithLogined>
       </article>

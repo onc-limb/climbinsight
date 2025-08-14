@@ -16,13 +16,6 @@ export default function ArticleLikeDisplay({ likes }: ArticleLikeDisplayProps) {
       >
         ♡ いいね ({likes})
       </Button>
-      <p className="text-sm text-gray-500 mt-2">
-        いいねするには
-        <Button variant="link" className="text-orange-500 p-0 mx-1 text-sm">
-          ログイン
-        </Button>
-        してください
-      </p>
     </div>
   )
 }
