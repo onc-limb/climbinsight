@@ -5,7 +5,6 @@ import Link from "next/link";
 import AuthButtons from './AuthButtons';
 
 export default function MobileMenu() {
-  const [isFeaturesMenuOpen, setIsFeaturesMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
@@ -58,37 +57,20 @@ export default function MobileMenu() {
       {/* Mobile Navigation Menu */}
       <div className={`md:hidden ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
         <div className="px-2 pt-2 pb-3 space-y-1 bg-orange-100">
-          <div className="block">
-            <button
-              onClick={() => setIsFeaturesMenuOpen(!isFeaturesMenuOpen)}
-              className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-200 flex justify-between items-center"
-            >
-              機能
-              <svg
-                className={`ml-2 h-4 w-4 transition-transform ${isFeaturesMenuOpen ? 'rotate-180' : ''}`}
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-            {isFeaturesMenuOpen && (
-              <div className="pl-4 space-y-1">
-                <Link
-                  href="/hold-extraction"
-                  className="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-orange-600 hover:bg-orange-200"
-                  onClick={closeMobileMenu}
-                >
-                  画像加工
-                </Link>
-              </div>
-            )}
-          </div>
+          <Link
+            href="/climblog"
+            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-200"
+            onClick={closeMobileMenu}
+          >
+            ClimbLog
+          </Link>
+          <Link
+            href="/hold-extraction"
+            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-200"
+            onClick={closeMobileMenu}
+          >
+            ClimbSnap
+          </Link>
           <Link
             href="/contact"
             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-200"
