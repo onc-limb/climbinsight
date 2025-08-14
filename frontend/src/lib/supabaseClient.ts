@@ -1,9 +1,9 @@
-import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
 
 export const signUp = async (input: { email: string; password: string }) => {
   return await supabase.auth.signUp({
