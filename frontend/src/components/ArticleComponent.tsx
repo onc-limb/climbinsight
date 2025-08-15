@@ -31,7 +31,7 @@ export default function ArticleComponent({ article }: ArticleComponentProps) {
       className="bg-white rounded-lg shadow-lg overflow-hidden border border-orange-200 hover:shadow-xl transition-shadow h-full flex flex-col lg:flex-row"
     >
       {/* Cover Media */}
-      <div className="bg-orange-200 h-48 lg:h-auto lg:w-3/5 flex items-center justify-center">
+      <div className="bg-orange-200 h-64 lg:h-auto lg:w-3/5 flex items-center justify-center">
         {article.coverImage ? (
           <MediaEmbed 
             url={article.coverImage} 
