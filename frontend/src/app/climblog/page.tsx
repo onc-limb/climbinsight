@@ -99,7 +99,7 @@ export default function ArticlesPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 gap-6 sm:gap-8">
             {articles.map((article) => (
               <ArticleComponent 
                 key={article.id}
