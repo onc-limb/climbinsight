@@ -28,10 +28,10 @@ export default function ArticleComponent({ article }: ArticleComponentProps) {
 
   return (
     <article 
-      className="bg-white rounded-lg shadow-lg overflow-hidden border border-orange-200 hover:shadow-xl transition-shadow h-full flex flex-col md:flex-row"
+      className="bg-white rounded-lg shadow-lg overflow-hidden border border-orange-200 hover:shadow-xl transition-shadow h-full flex flex-col lg:flex-row"
     >
       {/* Cover Media */}
-      <div className="bg-orange-200 h-48 md:h-auto md:w-1/3 flex items-center justify-center">
+      <div className="bg-orange-200 h-48 lg:h-auto lg:w-3/5 flex items-center justify-center">
         {article.coverImage ? (
           <MediaEmbed 
             url={article.coverImage} 
@@ -44,7 +44,7 @@ export default function ArticleComponent({ article }: ArticleComponentProps) {
       </div>
 
       {/* Article Content */}
-      <div className="p-6 flex-grow flex flex-col md:w-2/3">
+      <div className="p-6 flex-grow flex flex-col lg:w-2/5">
         <h3 className="text-xl font-bold text-orange-900 mb-2 line-clamp-2">
           {article.title}
         </h3>
