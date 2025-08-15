@@ -13,7 +13,7 @@ export const testArticles: Article[] = [
   {
     id: 2,
     title: "小川山 廻り目平のボルダー課題",
-    coverImage: "https://instagram.com/p/example123",
+    coverImage: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     tags: ["小川山", "V4", "ボルダリング"],
     postedDate: "2024-03-10",
     description:
@@ -31,7 +31,7 @@ export const testArticles: Article[] = [
   {
     id: 4,
     title: "小川山 金峰山荘周辺の初級者向け課題",
-    coverImage: "https://example.com/climbing-photo.jpg",
+    coverImage: "https://localhost/climbing-photo.jpg",
     tags: ["小川山", "5.7", "初級者"],
     postedDate: "2024-03-05",
     description: "金峰山荘周辺で楽しめる初級者向けの課題を厳選してご紹介。",

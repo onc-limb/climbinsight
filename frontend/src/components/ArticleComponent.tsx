@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import MediaEmbed from "./MediaEmbed";
@@ -27,7 +26,6 @@ export default function ArticleComponent({ article }: ArticleComponentProps) {
   };
 
   return (
-    <Link href={`/climblog/${article.id}`} className="block h-full">
       <article 
         className="bg-white rounded-lg shadow-lg overflow-hidden border border-orange-200 hover:shadow-xl transition-shadow cursor-pointer h-full flex flex-col"
       >
@@ -70,9 +68,11 @@ export default function ArticleComponent({ article }: ArticleComponentProps) {
           <div className="text-sm text-gray-500 mt-auto">
             投稿日: {formatDate(article.postedDate)}
           </div>
+          <Link href={`/climblog/${article.id}`} className="block h-full">
+            記事本文を見る
+          </Link>
         </div>
       </article>
-    </Link>
   );
 }
 
