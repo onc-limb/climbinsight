@@ -66,15 +66,15 @@ export default function ArticleComponent({ article }: ArticleComponentProps) {
         </div>
 
         {/* Posted Date and Link */}
-        <div className="flex justify-between items-center mt-auto">
-          <div className="text-sm text-gray-500">
+        <div className="flex flex-col gap-2 mt-auto">
+          <div className="text-sm text-gray-500 whitespace-nowrap">
             投稿日: {formatDate(article.postedDate)}
           </div>
           <Link href={`/climblog/${article.id}`}>
             <Button 
               variant="outline" 
               size="sm"
-              className="border-orange-500 text-orange-500 hover:bg-orange-50"
+              className="border-orange-500 text-orange-500 hover:bg-orange-50 w-full whitespace-nowrap"
             >
               詳細を見る
             </Button>
