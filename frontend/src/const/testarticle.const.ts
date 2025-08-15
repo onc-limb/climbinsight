@@ -4,7 +4,7 @@ export const testArticles: Article[] = [
   {
     id: 1,
     title: "小川山の名課題「エイハブ船長」完登記録",
-    coverImage: null,
+    coverImage: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     tags: ["小川山", "5.12a", "トラッド"],
     postedDate: "2024-03-15",
     description:
@@ -13,7 +13,7 @@ export const testArticles: Article[] = [
   {
     id: 2,
     title: "小川山 廻り目平のボルダー課題",
-    coverImage: null,
+    coverImage: "https://instagram.com/p/example123",
     tags: ["小川山", "V4", "ボルダリング"],
     postedDate: "2024-03-10",
     description:
@@ -22,7 +22,7 @@ export const testArticles: Article[] = [
   {
     id: 3,
     title: "小川山 屋根岩の5.11クラック特集",
-    coverImage: null,
+    coverImage: "https://example.b-cdn.net/climbing-video.mp4",
     tags: ["小川山", "5.11c", "クラック"],
     postedDate: "2024-03-08",
     description:
@@ -31,7 +31,7 @@ export const testArticles: Article[] = [
   {
     id: 4,
     title: "小川山 金峰山荘周辺の初級者向け課題",
-    coverImage: null,
+    coverImage: "https://example.com/climbing-photo.jpg",
     tags: ["小川山", "5.7", "初級者"],
     postedDate: "2024-03-05",
     description: "金峰山荘周辺で楽しめる初級者向けの課題を厳選してご紹介。",

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import MediaEmbed from "./MediaEmbed";
 
 interface Article {
   id: number;
@@ -30,15 +31,13 @@ export default function ArticleComponent({ article }: ArticleComponentProps) {
       <article 
         className="bg-white rounded-lg shadow-lg overflow-hidden border border-orange-200 hover:shadow-xl transition-shadow cursor-pointer h-full flex flex-col"
       >
-        {/* Cover Image */}
+        {/* Cover Media */}
         <div className="bg-orange-200 h-48 flex items-center justify-center">
           {article.coverImage ? (
-            <Image 
-              src={article.coverImage} 
-              alt={article.title}
-              height={100} 
-              width={250} 
-              className="w-full h-full object-cover"
+            <MediaEmbed 
+              url={article.coverImage} 
+              title={article.title}
+              className="w-full h-full"
             />
           ) : (
             <span className="text-orange-700 font-medium">サンプル画像</span>
