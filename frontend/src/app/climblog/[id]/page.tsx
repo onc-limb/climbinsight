@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { testArticles } from '@/const/testarticle.const'
@@ -8,6 +7,7 @@ import ArticleLikeDisplay from '@/components/client/ArticleLikeDisplay'
 import ArticleComments, { type Comment } from '@/components/client/ArticleComments'
 import WithLogined from '@/components/client/WithLogined'
 import Link from 'next/link'
+import MediaEmbed from '@/components/MediaEmbed'
 
 interface DetailedArticle extends Article {
   content: string
@@ -115,27 +115,13 @@ export default async function ArticleDetailPage({ params }: { params: { id: stri
         </header>
 
         {/* Media */}
-        {(article.videoUrl || article.coverImage) && (
+        {(article.coverImage) && (
           <div className="mb-8">
-            {article.videoUrl ? (
-              <div className="aspect-video">
-                <iframe
-                  src={article.videoUrl}
-                  title={article.title}
-                  className="w-full h-full rounded-lg"
-                  allowFullScreen
-                />
-              </div>
-            ) : article.coverImage ? (
-              <div className="relative aspect-video">
-                <Image
-                  src={article.coverImage}
-                  alt={article.title}
-                  fill
-                  className="object-cover rounded-lg"
-                />
-              </div>
-            ) : null}
+            <MediaEmbed 
+              url={article.coverImage} 
+              title={article.title}
+              className="w-full h-full"
+            />
           </div>
         )}
 
