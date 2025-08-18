@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { GRADES } from '@/const/grade.const'
 
 type ClimbingType = 'gym' | 'outdoor' | 'other'
 type MediaType = 'image' | 'video' | 'youtube'
@@ -27,6 +28,7 @@ interface PostData {
   routeName?: string
   grade?: string
   category?: string
+  comment: string
   createArticle: boolean
   content: string
 }
@@ -38,6 +40,7 @@ export default function PostPage() {
     mediaType: 'image',
     tags: [],
     climbingType: 'gym',
+    comment: '',
     createArticle: false,
     content: ''
   })
@@ -210,6 +213,18 @@ export default function PostPage() {
                 )}
               </div>
 
+              {/* コメント */}
+              <div className="space-y-2">
+                <Label htmlFor="comment">コメント</Label>
+                <Textarea
+                  id="comment"
+                  placeholder="コメントを入力してください"
+                  value={postData.comment}
+                  onChange={(e) => setPostData(prev => ({ ...prev, comment: e.target.value }))}
+                  rows={3}
+                />
+              </div>
+
             </CardContent>
           </Card>
 
@@ -312,12 +327,21 @@ export default function PostPage() {
               {(postData.climbingType === 'gym' || postData.climbingType === 'outdoor') && (
                 <div className="space-y-2">
                   <Label htmlFor="grade">グレード</Label>
-                  <Input
-                    id="grade"
-                    placeholder="グレードを入力してください"
-                    value={postData.grade || ''}
-                    onChange={(e) => setPostData(prev => ({ ...prev, grade: e.target.value }))}
-                  />
+                  <Select 
+                    value={postData.grade || ''} 
+                    onValueChange={(value: string) => setPostData(prev => ({ ...prev, grade: value }))}
+                  >
+                    <SelectTrigger id="grade">
+                      <SelectValue placeholder="グレードを選択してください" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {GRADES.map((grade) => (
+                        <SelectItem key={grade} value={grade}>
+                          {grade}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
             </CardContent>
