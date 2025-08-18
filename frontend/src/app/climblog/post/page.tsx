@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
 
 type ClimbingType = 'gym' | 'outdoor' | 'other'
 type MediaType = 'image' | 'video' | 'youtube'
@@ -19,7 +20,6 @@ interface PostData {
   mediaFile?: File
   youtubeUrl?: string
   tags: string[]
-  content: string
   climbingType: ClimbingType
   gymName?: string
   areaName?: string
@@ -27,6 +27,8 @@ interface PostData {
   routeName?: string
   grade?: string
   category?: string
+  createArticle: boolean
+  content: string
 }
 
 export default function PostPage() {
@@ -35,8 +37,9 @@ export default function PostPage() {
     title: '',
     mediaType: 'image',
     tags: [],
-    content: '',
-    climbingType: 'gym'
+    climbingType: 'gym',
+    createArticle: false,
+    content: ''
   })
   const [tagInput, setTagInput] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -207,17 +210,6 @@ export default function PostPage() {
                 )}
               </div>
 
-              {/* コンテンツ */}
-              <div className="space-y-2">
-                <Label htmlFor="content">コンテンツ</Label>
-                <Textarea
-                  id="content"
-                  placeholder="記事の詳細内容を入力してください"
-                  value={postData.content}
-                  onChange={(e) => setPostData(prev => ({ ...prev, content: e.target.value }))}
-                  rows={6}
-                />
-              </div>
             </CardContent>
           </Card>
 
@@ -325,6 +317,43 @@ export default function PostPage() {
                     placeholder="グレードを入力してください"
                     value={postData.grade || ''}
                     onChange={(e) => setPostData(prev => ({ ...prev, grade: e.target.value }))}
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* 記事セクション */}
+          <Card>
+            <CardHeader>
+              <CardTitle>記事</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="createArticle"
+                  checked={postData.createArticle}
+                  onCheckedChange={(checked) => 
+                    setPostData(prev => ({ 
+                      ...prev, 
+                      createArticle: checked as boolean,
+                      content: checked ? prev.content : '' 
+                    }))
+                  }
+                />
+                <Label htmlFor="createArticle">記事を作成する</Label>
+              </div>
+              
+              {postData.createArticle && (
+                <div className="space-y-2">
+                  <Label htmlFor="content">記事内容</Label>
+                  <Textarea
+                    id="content"
+                    placeholder="記事の詳細内容を入力してください...\n\n例：\n・今日のクライミングの感想\n・攻略のコツやテクニック\n・使用した装備\n・次回の課題"
+                    value={postData.content}
+                    onChange={(e) => setPostData(prev => ({ ...prev, content: e.target.value }))}
+                    rows={12}
+                    className="min-h-[300px]"
                   />
                 </div>
               )}
