@@ -69,7 +69,7 @@ model = PyTorchModel(
 # サーバレス設定
 serverless_config = ServerlessInferenceConfig(
     memory_size_in_mb=6144,
-    max_concurrency=10
+    max_concurrency=1
 )
 
 # エンドポイントのデプロイ

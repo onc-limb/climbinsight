@@ -1,95 +1,99 @@
 package infra
 
 import (
-	"bytes"
 	"climbinsight/server/internal/domain"
-	"climbinsight/server/utils"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io"
-	"mime/multipart"
-	"net/http"
 	"os"
+
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/sagemakerruntime"
 )
 
-type ImageEditService struct{}
+type ImageEditService struct {
+	sagemakerClient *sagemakerruntime.Client
+}
 
 type ProcessImageResponse struct {
 	ResultImageBase64 string `json:"result_image_base64"`
 	MaskImageBase64   string `json:"mask_image_base64"`
 }
 
+type SageMakerRequest struct {
+	ImageBase64 string         `json:"image_base64"`
+	Points      []domain.Point `json:"points"`
+}
+
 func NewImageEditService() *ImageEditService {
-	return &ImageEditService{}
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		panic(fmt.Sprintf("failed to load AWS config: %v", err))
+	}
+
+	sagemakerClient := sagemakerruntime.NewFromConfig(cfg)
+
+	return &ImageEditService{
+		sagemakerClient: sagemakerClient,
+	}
 }
 
 func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]byte, []byte, error) {
-	// multipart/form-data 組み立て
-	var buf bytes.Buffer
-	writer := multipart.NewWriter(&buf)
+	// Get SageMaker endpoint URL from environment variable
+	endpointName := os.Getenv("AWS_SAGEMAKER_ENDPOINT_NAME")
+	if endpointName == "" {
+		return nil, nil, fmt.Errorf("AWS_SAGEMAKER_ENDPOINT environment variable is not set")
+	}
 
-	// 画像ファイルを付ける
-	filePart, err := writer.CreateFormFile("file", "image.png")
+	// Convert image to base64
+	imageBase64 := base64.StdEncoding.EncodeToString(image)
+
+	// Create request payload for SageMaker
+	sagemakerReq := SageMakerRequest{
+		ImageBase64: imageBase64,
+		Points:      points,
+	}
+
+	// Marshal request to JSON
+	requestBody, err := json.Marshal(sagemakerReq)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
-	_, err = filePart.Write(image)
+
+	// Create SageMaker InvokeEndpoint request
+	input := &sagemakerruntime.InvokeEndpointInput{
+		EndpointName: &endpointName,
+		Body:         requestBody,
+		ContentType:  &[]string{"application/json"}[0],
+	}
+
+	// Invoke SageMaker endpoint
+	result, err := ies.sagemakerClient.InvokeEndpoint(context.TODO(), input)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to invoke SageMaker endpoint: %w", err)
 	}
 
-	// 座標配列をJSON化して付ける
-	pointsJSON, err := json.Marshal(points)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	err = writer.WriteField("points", string(pointsJSON))
-	if err != nil {
-		return nil, nil, err
-	}
-
-	writer.Close()
-
-	req, err := http.NewRequest("POST", os.Getenv("AI_SERVER_URL")+"/process", &buf)
-	if err != nil {
-		return nil, nil, err
-	}
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-
-	resp, err := utils.FetchWithRetry(req)
-	if err != nil {
-		return nil, nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, nil, fmt.Errorf("failed to process image: %s", resp.Status)
-	}
-
-	bodyByte, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, nil, err
-	}
-
+	// Parse response
 	var imageResp ProcessImageResponse
-	err = json.Unmarshal(bodyByte, &imageResp)
+	err = json.Unmarshal(result.Body, &imageResp)
 	if err != nil {
 		fmt.Println("Error unmarshalling JSON:", err)
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to unmarshal response: %w", err)
 	}
 
-	result, err := base64.StdEncoding.DecodeString(imageResp.ResultImageBase64)
+	// Decode base64 images
+	resultImage, err := base64.StdEncoding.DecodeString(imageResp.ResultImageBase64)
 	if err != nil {
 		fmt.Println("Error decoding result image:", err)
-		return nil, nil, err
-	}
-	mask, err := base64.StdEncoding.DecodeString(imageResp.MaskImageBase64)
-	if err != nil {
-		fmt.Println("Error decoding mask image:", err)
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to decode result image: %w", err)
 	}
 
-	return result, mask, nil
+	maskImage, err := base64.StdEncoding.DecodeString(imageResp.MaskImageBase64)
+	if err != nil {
+		fmt.Println("Error decoding mask image:", err)
+		return nil, nil, fmt.Errorf("failed to decode mask image: %w", err)
+	}
+
+	return resultImage, maskImage, nil
 }
