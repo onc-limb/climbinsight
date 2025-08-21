@@ -12,7 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sagemakerruntime"
 )
 
-type ImageEditService struct{
+type ImageEditService struct {
 	sagemakerClient *sagemakerruntime.Client
 }
 
@@ -22,8 +22,8 @@ type ProcessImageResponse struct {
 }
 
 type SageMakerRequest struct {
-	ImageBase64 string          `json:"image_base64"`
-	Points      []domain.Point  `json:"points"`
+	ImageBase64 string         `json:"image_base64"`
+	Points      []domain.Point `json:"points"`
 }
 
 func NewImageEditService() *ImageEditService {
@@ -31,9 +31,9 @@ func NewImageEditService() *ImageEditService {
 	if err != nil {
 		panic(fmt.Sprintf("failed to load AWS config: %v", err))
 	}
-	
+
 	sagemakerClient := sagemakerruntime.NewFromConfig(cfg)
-	
+
 	return &ImageEditService{
 		sagemakerClient: sagemakerClient,
 	}
@@ -41,7 +41,7 @@ func NewImageEditService() *ImageEditService {
 
 func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]byte, []byte, error) {
 	// Get SageMaker endpoint URL from environment variable
-	endpointName := os.Getenv("AWS_SAGEMAKER_ENDPOINT")
+	endpointName := os.Getenv("AWS_SAGEMAKER_ENDPOINT_NAME")
 	if endpointName == "" {
 		return nil, nil, fmt.Errorf("AWS_SAGEMAKER_ENDPOINT environment variable is not set")
 	}
@@ -88,7 +88,7 @@ func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]
 		fmt.Println("Error decoding result image:", err)
 		return nil, nil, fmt.Errorf("failed to decode result image: %w", err)
 	}
-	
+
 	maskImage, err := base64.StdEncoding.DecodeString(imageResp.MaskImageBase64)
 	if err != nil {
 		fmt.Println("Error decoding mask image:", err)
