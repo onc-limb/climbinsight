@@ -1,11 +1,13 @@
 package infra
 
 import (
+	"archive/zip"
+	"bytes"
 	"climbinsight/server/internal/domain"
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -16,14 +18,8 @@ type ImageEditService struct {
 	sagemakerClient *sagemakerruntime.Client
 }
 
-type ProcessImageResponse struct {
-	ResultImageBase64 string `json:"result_image_base64"`
-	MaskImageBase64   string `json:"mask_image_base64"`
-}
-
 type SageMakerRequest struct {
-	ImageBase64 string         `json:"image_base64"`
-	Points      []domain.Point `json:"points"`
+	Points []domain.Point `json:"points"`
 }
 
 func NewImageEditService() *ImageEditService {
@@ -46,26 +42,28 @@ func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]
 		return nil, nil, fmt.Errorf("AWS_SAGEMAKER_ENDPOINT environment variable is not set")
 	}
 
-	// Convert image to base64
-	imageBase64 := base64.StdEncoding.EncodeToString(image)
-
 	// Create request payload for SageMaker
 	sagemakerReq := SageMakerRequest{
-		ImageBase64: imageBase64,
-		Points:      points,
+		Points: points,
 	}
 
-	// Marshal request to JSON
-	requestBody, err := json.Marshal(sagemakerReq)
+	// Marshal points to JSON
+	pointsJSON, err := json.Marshal(sagemakerReq)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to marshal request: %w", err)
+		return nil, nil, fmt.Errorf("failed to marshal points: %w", err)
+	}
+
+	// Create zip file with image binary and points JSON
+	zipBody, err := createZipPayload(image, pointsJSON)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to create zip payload: %w", err)
 	}
 
 	// Create SageMaker InvokeEndpoint request
 	input := &sagemakerruntime.InvokeEndpointInput{
 		EndpointName: &endpointName,
-		Body:         requestBody,
-		ContentType:  &[]string{"application/json"}[0],
+		Body:         zipBody,
+		ContentType:  &[]string{"application/zip"}[0],
 	}
 
 	// Invoke SageMaker endpoint
@@ -74,25 +72,86 @@ func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]
 		return nil, nil, fmt.Errorf("failed to invoke SageMaker endpoint: %w", err)
 	}
 
-	// Parse response
-	var imageResp ProcessImageResponse
-	err = json.Unmarshal(result.Body, &imageResp)
+	// Extract images from zip response
+	resultImage, maskImage, err := extractImagesFromZip(result.Body)
 	if err != nil {
-		fmt.Println("Error unmarshalling JSON:", err)
-		return nil, nil, fmt.Errorf("failed to unmarshal response: %w", err)
+		return nil, nil, fmt.Errorf("failed to extract images from zip response: %w", err)
 	}
 
-	// Decode base64 images
-	resultImage, err := base64.StdEncoding.DecodeString(imageResp.ResultImageBase64)
+	return resultImage, maskImage, nil
+}
+
+// createZipPayload creates a zip file containing the image binary and points JSON
+func createZipPayload(imageBinary []byte, pointsJSON []byte) ([]byte, error) {
+	// Create a buffer to hold the zip data
+	var zipBuffer bytes.Buffer
+	zipWriter := zip.NewWriter(&zipBuffer)
+
+	// Add image binary to zip
+	imageWriter, err := zipWriter.Create("image.bin")
 	if err != nil {
-		fmt.Println("Error decoding result image:", err)
-		return nil, nil, fmt.Errorf("failed to decode result image: %w", err)
+		return nil, fmt.Errorf("failed to create image entry in zip: %w", err)
+	}
+	_, err = imageWriter.Write(imageBinary)
+	if err != nil {
+		return nil, fmt.Errorf("failed to write image data to zip: %w", err)
 	}
 
-	maskImage, err := base64.StdEncoding.DecodeString(imageResp.MaskImageBase64)
+	// Add points JSON to zip
+	pointsWriter, err := zipWriter.Create("points.json")
 	if err != nil {
-		fmt.Println("Error decoding mask image:", err)
-		return nil, nil, fmt.Errorf("failed to decode mask image: %w", err)
+		return nil, fmt.Errorf("failed to create points entry in zip: %w", err)
+	}
+	_, err = pointsWriter.Write(pointsJSON)
+	if err != nil {
+		return nil, fmt.Errorf("failed to write points data to zip: %w", err)
+	}
+
+	// Close zip writer
+	err = zipWriter.Close()
+	if err != nil {
+		return nil, fmt.Errorf("failed to close zip writer: %w", err)
+	}
+
+	return zipBuffer.Bytes(), nil
+}
+
+// extractImagesFromZip extracts result and mask images from zip response
+func extractImagesFromZip(zipData []byte) ([]byte, []byte, error) {
+	// Create a reader from the zip data
+	zipReader, err := zip.NewReader(bytes.NewReader(zipData), int64(len(zipData)))
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to create zip reader: %w", err)
+	}
+
+	var resultImage, maskImage []byte
+
+	// Read files from zip
+	for _, file := range zipReader.File {
+		rc, err := file.Open()
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to open file %s in zip: %w", file.Name, err)
+		}
+
+		data, err := io.ReadAll(rc)
+		rc.Close()
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to read file %s from zip: %w", file.Name, err)
+		}
+
+		switch file.Name {
+		case "result_image.bin":
+			resultImage = data
+		case "mask_image.bin":
+			maskImage = data
+		}
+	}
+
+	if resultImage == nil {
+		return nil, nil, fmt.Errorf("result_image.bin not found in zip response")
+	}
+	if maskImage == nil {
+		return nil, nil, fmt.Errorf("mask_image.bin not found in zip response")
 	}
 
 	return resultImage, maskImage, nil
