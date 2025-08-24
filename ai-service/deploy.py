@@ -60,29 +60,57 @@ def delete_existing_resources(sm_client, endpoint_name: str, model_name: str, co
         else:
             logger.warning(f"⚠️  Could not delete endpoint {endpoint_name}: {str(e)}")
 
-    # Delete endpoint config if exists
+    # Delete all endpoint configs that contain the config_name pattern
     try:
-        sm_client.describe_endpoint_config(EndpointConfigName=config_name)
-        logger.info(f"🗑️  Deleting existing endpoint config: {config_name}")
-        sm_client.delete_endpoint_config(EndpointConfigName=config_name)
-        logger.info(f"✅ Endpoint config {config_name} deleted successfully")
-    except Exception as e:
-        if "ValidationException" in str(e) or "does not exist" in str(e):
-            logger.info(f"✅ No existing endpoint config to delete: {config_name}")
+        # List all endpoint configs that contain the config_name
+        configs_response = sm_client.list_endpoint_configs(
+            NameContains=config_name,
+            MaxResults=100
+        )
+        
+        configs_to_delete = configs_response.get('EndpointConfigs', [])
+        
+        if configs_to_delete:
+            logger.info(f"🗑️  Found {len(configs_to_delete)} endpoint configs containing '{config_name}' to delete")
+            for config in configs_to_delete:
+                config_name_to_delete = config['EndpointConfigName']
+                try:
+                    logger.info(f"🗑️  Deleting endpoint config: {config_name_to_delete}")
+                    sm_client.delete_endpoint_config(EndpointConfigName=config_name_to_delete)
+                    logger.info(f"✅ Endpoint config {config_name_to_delete} deleted successfully")
+                except Exception as e:
+                    logger.warning(f"⚠️  Could not delete endpoint config {config_name_to_delete}: {str(e)}")
         else:
-            logger.warning(f"⚠️  Could not delete endpoint config {config_name}: {str(e)}")
+            logger.info(f"✅ No existing endpoint configs containing '{config_name}' to delete")
+            
+    except Exception as e:
+        logger.warning(f"⚠️  Error listing endpoint configs containing '{config_name}': {str(e)}")
 
-    # Delete model if exists
+    # Delete all models that contain the model_name pattern
     try:
-        sm_client.describe_model(ModelName=model_name)
-        logger.info(f"🗑️  Deleting existing model: {model_name}")
-        sm_client.delete_model(ModelName=model_name)
-        logger.info(f"✅ Model {model_name} deleted successfully")
-    except Exception as e:
-        if "ValidationException" in str(e) or "does not exist" in str(e):
-            logger.info(f"✅ No existing model to delete: {model_name}")
+        # List all models that contain the model_name
+        models_response = sm_client.list_models(
+            NameContains=model_name,
+            MaxResults=100
+        )
+        
+        models_to_delete = models_response.get('Models', [])
+        
+        if models_to_delete:
+            logger.info(f"🗑️  Found {len(models_to_delete)} models containing '{model_name}' to delete")
+            for model in models_to_delete:
+                model_name_to_delete = model['ModelName']
+                try:
+                    logger.info(f"🗑️  Deleting model: {model_name_to_delete}")
+                    sm_client.delete_model(ModelName=model_name_to_delete)
+                    logger.info(f"✅ Model {model_name_to_delete} deleted successfully")
+                except Exception as e:
+                    logger.warning(f"⚠️  Could not delete model {model_name_to_delete}: {str(e)}")
         else:
-            logger.warning(f"⚠️  Could not delete model {model_name}: {str(e)}")
+            logger.info(f"✅ No existing models containing '{model_name}' to delete")
+            
+    except Exception as e:
+        logger.warning(f"⚠️  Error listing models containing '{model_name}': {str(e)}")
 
 def cleanup_old_resources(sess: sagemaker.Session, keep_latest: int = 2):
     """
@@ -157,7 +185,7 @@ role = os.getenv('AWS_SAGEMAKER_ROLE')
 # リソース名
 ENDPOINT_NAME = 'image-process-endpoint'
 MODEL_NAME = "image-process-model"
-CONFIG_NAME = "image-process-config"
+CONFIG_NAME = "image-process-endpoint"
 
 # 環境変数チェック
 if not role:
@@ -214,7 +242,6 @@ try:
     predictor = model.deploy(
             serverless_inference_config=serverless_config,
             endpoint_name=ENDPOINT_NAME,
-            update_endpoint=True
         )
     logger.info(f"🎉 Endpoint created successfully!")
     logger.info(f"📍 Endpoint name: {predictor.endpoint_name}")
