@@ -69,7 +69,7 @@ def cleanup_old_resources(sess: sagemaker.Session, keep_latest: int = 2):
             config_name = config["EndpointConfigName"]
             try:
                 logger.info(f"🗑️  Deleting old endpoint config: {config_name}")
-                sess.delete_endpoint_config(config_name)
+                sm_client.delete_endpoint_config(config_name)
             except Exception as e:
                 logger.warning(f"⚠️  Could not delete config {config_name}: {str(e)}")
 
@@ -79,7 +79,7 @@ def cleanup_old_resources(sess: sagemaker.Session, keep_latest: int = 2):
             model_name = model["ModelName"]
             try:
                 logger.info(f"🗑️  Deleting old model: {model_name}")
-                Model(model_data=None, image_uri=None, role=None, name=model_name, sagemaker_session=sess).delete_model()
+                sm_client.delete_model(ModelName=model_name)
             except Exception as e:
                 logger.warning(f"⚠️  Could not delete model {model_name}: {str(e)}")
 
@@ -145,7 +145,6 @@ try:
     predictor = model.deploy(
         serverless_inference_config=serverless_config,
         endpoint_name=ENDPOINT_NAME,
-        update_endpoint=True
     )
     
     logger.info(f"🎉 Endpoint created successfully!")
