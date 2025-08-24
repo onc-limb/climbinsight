@@ -55,7 +55,7 @@ def cleanup_old_resources(sess: sagemaker.Session, keep_latest: int = 2):
         )
         # List endpoint configs
         configs_response = sm_client.list_endpoint_configs(
-            NameContains="pytorch-inference-",
+            NameContains="image-process-config-",
             MaxResults=100
         )
 
@@ -119,9 +119,20 @@ try:
 
     logger.info(f"Script uploaded to: {source_dir_path}")
 
-    # 一意なモデル名を生成（タイムスタンプ付き）
+    # 一意な名前を生成（タイムスタンプ付き）
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     model_name = f"image-process-model-{timestamp}"
+    config_name = f"image-process-config-{timestamp}"
+
+    # Check if endpoint already exists
+    try:
+        sm_client = sagemaker_session.sagemaker_client
+        sm_client.describe_endpoint(EndpointName=ENDPOINT_NAME)
+        endpoint_exists = True
+        logger.info(f"🔍 Found existing endpoint: {ENDPOINT_NAME}")
+    except Exception:
+        endpoint_exists = False
+        logger.info(f"✅ No existing endpoint found: {ENDPOINT_NAME}")
 
     # モデルを作成
     model = PyTorchModel(
@@ -135,20 +146,29 @@ try:
         name=model_name
     )
 
-        # サーバレス設定
+    # サーバレス設定
     serverless_config = ServerlessInferenceConfig(
         memory_size_in_mb=6144,
         max_concurrency=1
     )
 
-    # エンドポイントをデプロイ
-    predictor = model.deploy(
-        serverless_inference_config=serverless_config,
-        endpoint_name=ENDPOINT_NAME,
-    )
-    
-    logger.info(f"🎉 Endpoint created successfully!")
-
+    if endpoint_exists:
+        # 既存エンドポイントを更新
+        logger.info(f"🔄 Updating existing endpoint: {ENDPOINT_NAME}")
+        predictor = model.deploy(
+            serverless_inference_config=serverless_config,
+            endpoint_name=ENDPOINT_NAME,
+            update_endpoint=True
+        )
+        logger.info(f"🎉 Endpoint updated successfully!")
+    else:
+        # 新規エンドポイントを作成
+        logger.info(f"🚀 Creating new endpoint: {ENDPOINT_NAME}")
+        predictor = model.deploy(
+            serverless_inference_config=serverless_config,
+            endpoint_name=ENDPOINT_NAME,
+        )
+        logger.info(f"🎉 Endpoint created successfully!")
     logger.info(f"📍 Endpoint name: {predictor.endpoint_name}")
     logger.info(f"🔗 Endpoint URL: https://runtime.sagemaker.{sagemaker_session.boto_region_name}.amazonaws.com/endpoints/{predictor.endpoint_name}/invocations")
 
@@ -165,9 +185,11 @@ try:
     print(f"\n=== Deployment Summary ===")
     print(f"Endpoint name: {predictor.endpoint_name}")
     print(f"Model name: {model_name}")
+    print(f"Config name: {config_name}")
     print(f"Region: {sagemaker_session.boto_region_name}")
     print(f"Status: Ready for inference")
     print(f"Content-Type: application/zip")
+    print(f"Operation: {'Updated' if endpoint_exists else 'Created'}")
     print(f"==========================")
 
 except Exception as e:
