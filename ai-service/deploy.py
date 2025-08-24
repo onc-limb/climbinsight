@@ -2,6 +2,7 @@ import sagemaker
 from sagemaker.serverless import ServerlessInferenceConfig
 from sagemaker.model import Model
 from sagemaker.pytorch import PyTorchModel
+from sagemaker.predictor import Predictor
 import tarfile
 import os
 import logging
@@ -38,6 +39,51 @@ def create_script_tar(source_dir: str = './app', output_file: str = 'script.tar.
     logger.info(f"✅ Created {output_file} ({file_size_mb:.2f} MB)")
     return output_file
 
+def delete_existing_resources(sm_client, endpoint_name: str, model_name: str, config_name: str):
+    """
+    Delete existing endpoint, endpoint config, and model if they exist.
+    """
+    # Delete endpoint if exists
+    try:
+        sm_client.describe_endpoint(EndpointName=endpoint_name)
+        logger.info(f"🗑️  Deleting existing endpoint: {endpoint_name}")
+        sm_client.delete_endpoint(EndpointName=endpoint_name)
+        
+        # Wait for endpoint deletion
+        logger.info("⏳ Waiting for endpoint deletion to complete...")
+        waiter = sm_client.get_waiter('endpoint_deleted')
+        waiter.wait(EndpointName=endpoint_name)
+        logger.info(f"✅ Endpoint {endpoint_name} deleted successfully")
+    except Exception as e:
+        if "ValidationException" in str(e) or "does not exist" in str(e):
+            logger.info(f"✅ No existing endpoint to delete: {endpoint_name}")
+        else:
+            logger.warning(f"⚠️  Could not delete endpoint {endpoint_name}: {str(e)}")
+
+    # Delete endpoint config if exists
+    try:
+        sm_client.describe_endpoint_config(EndpointConfigName=config_name)
+        logger.info(f"🗑️  Deleting existing endpoint config: {config_name}")
+        sm_client.delete_endpoint_config(EndpointConfigName=config_name)
+        logger.info(f"✅ Endpoint config {config_name} deleted successfully")
+    except Exception as e:
+        if "ValidationException" in str(e) or "does not exist" in str(e):
+            logger.info(f"✅ No existing endpoint config to delete: {config_name}")
+        else:
+            logger.warning(f"⚠️  Could not delete endpoint config {config_name}: {str(e)}")
+
+    # Delete model if exists
+    try:
+        sm_client.describe_model(ModelName=model_name)
+        logger.info(f"🗑️  Deleting existing model: {model_name}")
+        sm_client.delete_model(ModelName=model_name)
+        logger.info(f"✅ Model {model_name} deleted successfully")
+    except Exception as e:
+        if "ValidationException" in str(e) or "does not exist" in str(e):
+            logger.info(f"✅ No existing model to delete: {model_name}")
+        else:
+            logger.warning(f"⚠️  Could not delete model {model_name}: {str(e)}")
+
 def cleanup_old_resources(sess: sagemaker.Session, keep_latest: int = 2):
     """
     Clean up old models and endpoint configurations using SageMaker SDK,
@@ -63,13 +109,29 @@ def cleanup_old_resources(sess: sagemaker.Session, keep_latest: int = 2):
         models = sorted(models_response["Models"], key=lambda x: x["CreationTime"], reverse=True)
         configs = sorted(configs_response["EndpointConfigs"], key=lambda x: x["CreationTime"], reverse=True)
 
-        # Delete old configs
-        configs_to_delete = configs[keep_latest:]
+        # Get current endpoint config to avoid deleting it
+        current_config = None
+        try:
+            endpoint_info = sm_client.describe_endpoint(EndpointName="image-process-endpoint")
+            current_config = endpoint_info['EndpointConfigName']
+            logger.info(f"🔒 Current config in use: {current_config}")
+        except Exception:
+            # Endpoint doesn't exist, no config to protect
+            pass
+
+        # Delete old configs (but not the current one)
+        configs_to_delete = []
+        for i, config in enumerate(configs):
+            config_name = config["EndpointConfigName"]
+            # Skip if it's the current config or within keep_latest count
+            if config_name != current_config and i >= keep_latest:
+                configs_to_delete.append(config)
+
         for config in configs_to_delete:
             config_name = config["EndpointConfigName"]
             try:
                 logger.info(f"🗑️  Deleting old endpoint config: {config_name}")
-                sm_client.delete_endpoint_config(config_name)
+                sm_client.delete_endpoint_config(EndpointConfigName=config_name)
             except Exception as e:
                 logger.warning(f"⚠️  Could not delete config {config_name}: {str(e)}")
 
@@ -92,8 +154,10 @@ def cleanup_old_resources(sess: sagemaker.Session, keep_latest: int = 2):
 sagemaker_session = sagemaker.Session()
 role = os.getenv('AWS_SAGEMAKER_ROLE')
 
-# エンドポイント名
+# リソース名
 ENDPOINT_NAME = 'image-process-endpoint'
+MODEL_NAME = "image-process-model"
+CONFIG_NAME = "image-process-config"
 
 # 環境変数チェック
 if not role:
@@ -119,22 +183,15 @@ try:
 
     logger.info(f"Script uploaded to: {source_dir_path}")
 
-    # 一意な名前を生成（タイムスタンプ付き）
-    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    model_name = f"image-process-model-{timestamp}"
-    config_name = f"image-process-config-{timestamp}"
-
-    # Check if endpoint already exists
-    try:
-        sm_client = sagemaker_session.sagemaker_client
-        sm_client.describe_endpoint(EndpointName=ENDPOINT_NAME)
-        endpoint_exists = True
-        logger.info(f"🔍 Found existing endpoint: {ENDPOINT_NAME}")
-    except Exception:
-        endpoint_exists = False
-        logger.info(f"✅ No existing endpoint found: {ENDPOINT_NAME}")
+    # SageMaker client
+    sm_client = sagemaker_session.sagemaker_client
+    
+    # 既存のリソースを全て削除
+    logger.info("🧹 Deleting existing resources before creating new ones...")
+    delete_existing_resources(sm_client, ENDPOINT_NAME, MODEL_NAME, CONFIG_NAME)
 
     # モデルを作成
+    logger.info(f"📦 Creating new model: {MODEL_NAME}")
     model = PyTorchModel(
         model_data=model_s3_uri,
         role=role,
@@ -143,7 +200,7 @@ try:
         sagemaker_session=sagemaker_session,
         source_dir=source_dir_path,
         entry_point='inference.py',
-        name=model_name
+        name=MODEL_NAME
     )
 
     # サーバレス設定
@@ -152,23 +209,14 @@ try:
         max_concurrency=1
     )
 
-    if endpoint_exists:
-        # 既存エンドポイントを更新
-        logger.info(f"🔄 Updating existing endpoint: {ENDPOINT_NAME}")
-        predictor = model.deploy(
+    # エンドポイントを作成
+    logger.info(f"🔧 Creating endpoint: {ENDPOINT_NAME}")
+    predictor = model.deploy(
             serverless_inference_config=serverless_config,
             endpoint_name=ENDPOINT_NAME,
             update_endpoint=True
         )
-        logger.info(f"🎉 Endpoint updated successfully!")
-    else:
-        # 新規エンドポイントを作成
-        logger.info(f"🚀 Creating new endpoint: {ENDPOINT_NAME}")
-        predictor = model.deploy(
-            serverless_inference_config=serverless_config,
-            endpoint_name=ENDPOINT_NAME,
-        )
-        logger.info(f"🎉 Endpoint created successfully!")
+    logger.info(f"🎉 Endpoint created successfully!")
     logger.info(f"📍 Endpoint name: {predictor.endpoint_name}")
     logger.info(f"🔗 Endpoint URL: https://runtime.sagemaker.{sagemaker_session.boto_region_name}.amazonaws.com/endpoints/{predictor.endpoint_name}/invocations")
 
@@ -184,12 +232,12 @@ try:
 
     print(f"\n=== Deployment Summary ===")
     print(f"Endpoint name: {predictor.endpoint_name}")
-    print(f"Model name: {model_name}")
-    print(f"Config name: {config_name}")
+    print(f"Model name: {MODEL_NAME}")
+    print(f"Config name: {CONFIG_NAME}")
     print(f"Region: {sagemaker_session.boto_region_name}")
     print(f"Status: Ready for inference")
     print(f"Content-Type: application/zip")
-    print(f"Operation: {'Updated' if endpoint_exists else 'Created'}")
+    print(f"Operation: Recreated")
     print(f"==========================")
 
 except Exception as e:
