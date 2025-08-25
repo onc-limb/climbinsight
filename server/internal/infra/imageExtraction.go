@@ -80,6 +80,24 @@ func (ies *ImageEditService) ExtractionAsync(image []byte, points []domain.Point
 		return fmt.Errorf("failed to upload zip to S3: %w", err)
 	}
 
+	// Invoke SageMaker Async Endpoint with S3 input path
+	endpointName := os.Getenv("AWS_SAGEMAKER_ENDPOINT_NAME")
+	if endpointName == "" {
+		return fmt.Errorf("AWS_SAGEMAKER_ENDPOINT_NAME environment variable is not set")
+	}
+
+	inputS3URI := fmt.Sprintf("s3://%s/%s", bucketName, s3Key)
+
+	_, err = ies.sagemakerClient.InvokeEndpointAsync(context.TODO(), &sagemakerruntime.InvokeEndpointAsyncInput{
+		EndpointName:  &endpointName,
+		InputLocation: &inputS3URI,
+		ContentType:   &[]string{"application/zip"}[0],
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to invoke SageMaker async endpoint: %w", err)
+	}
+
 	return nil
 }
 

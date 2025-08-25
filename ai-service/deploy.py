@@ -1,5 +1,6 @@
 import sagemaker
 from sagemaker.serverless import ServerlessInferenceConfig
+from sagemaker.async_inference import AsyncInferenceConfig
 from sagemaker.model import Model
 from sagemaker.pytorch import PyTorchModel
 from sagemaker.predictor import Predictor
@@ -231,21 +232,23 @@ try:
         name=MODEL_NAME
     )
 
-    # サーバレス設定
-    serverless_config = ServerlessInferenceConfig(
-        memory_size_in_mb=6144,
-        max_concurrency=1
+    # 非同期推論設定
+    async_config = AsyncInferenceConfig(
+        output_path=f"s3://{sagemaker_session.default_bucket()}/async-inference-output/",
+        max_concurrent_invocations_per_instance=4
     )
 
     # エンドポイントを作成
-    logger.info(f"🔧 Creating endpoint: {ENDPOINT_NAME}")
+    logger.info(f"🔧 Creating async endpoint: {ENDPOINT_NAME}")
     predictor = model.deploy(
-            serverless_inference_config=serverless_config,
+            instance_type="ml.g4dn.xlarge",
+            initial_instance_count=1,
+            async_inference_config=async_config,
             endpoint_name=ENDPOINT_NAME,
         )
-    logger.info(f"🎉 Endpoint created successfully!")
+    logger.info(f"🎉 Async endpoint created successfully!")
     logger.info(f"📍 Endpoint name: {predictor.endpoint_name}")
-    logger.info(f"🔗 Endpoint URL: https://runtime.sagemaker.{sagemaker_session.boto_region_name}.amazonaws.com/endpoints/{predictor.endpoint_name}/invocations")
+    logger.info(f"🔗 Async Endpoint URL: https://runtime.sagemaker.{sagemaker_session.boto_region_name}.amazonaws.com/endpoints/{predictor.endpoint_name}/async-invocations")
 
     # 古いリソースをクリーンアップ
     cleanup_old_resources(sagemaker_session, keep_latest=2)
@@ -257,15 +260,16 @@ try:
     except Exception as e:
         logger.warning(f"⚠️  Could not remove {script_tar_path}: {str(e)}")
 
-    print(f"\n=== Deployment Summary ===")
+    print(f"\n=== Async Deployment Summary ===")
     print(f"Endpoint name: {predictor.endpoint_name}")
     print(f"Model name: {MODEL_NAME}")
     print(f"Config name: {CONFIG_NAME}")
     print(f"Region: {sagemaker_session.boto_region_name}")
-    print(f"Status: Ready for inference")
+    print(f"Instance type: ml.g4dn.xlarge")
+    print(f"Status: Ready for async inference")
     print(f"Content-Type: application/zip")
-    print(f"Operation: Recreated")
-    print(f"==========================")
+    print(f"Operation: Recreated as Async Endpoint")
+    print(f"==================================")
 
 except Exception as e:
     logger.error(f"❌ Deployment failed: {str(e)}")
