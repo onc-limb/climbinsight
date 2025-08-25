@@ -6,5 +6,5 @@ type Point struct {
 }
 
 type IImageEditService interface {
-	Extraction([]byte, []Point) ([]byte, []byte, error)
+	ExtractionAsync([]byte, []Point, string) error
 }

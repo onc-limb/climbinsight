@@ -7,15 +7,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/sagemakerruntime"
 )
 
 type ImageEditService struct {
 	sagemakerClient *sagemakerruntime.Client
+	s3Client        *s3.Client
 }
 
 type SageMakerRequest struct {
@@ -29,17 +31,19 @@ func NewImageEditService() *ImageEditService {
 	}
 
 	sagemakerClient := sagemakerruntime.NewFromConfig(cfg)
+	s3Client := s3.NewFromConfig(cfg)
 
 	return &ImageEditService{
 		sagemakerClient: sagemakerClient,
+		s3Client:        s3Client,
 	}
 }
 
-func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]byte, []byte, error) {
-	// Get SageMaker endpoint URL from environment variable
-	endpointName := os.Getenv("AWS_SAGEMAKER_ENDPOINT_NAME")
-	if endpointName == "" {
-		return nil, nil, fmt.Errorf("AWS_SAGEMAKER_ENDPOINT environment variable is not set")
+func (ies *ImageEditService) ExtractionAsync(image []byte, points []domain.Point, sessionName string) error {
+	// Get S3 bucket name from environment variable
+	bucketName := os.Getenv("AWS_S3_BUCKET_NAME")
+	if bucketName == "" {
+		return fmt.Errorf("AWS_S3_BUCKET_NAME environment variable is not set")
 	}
 
 	// Create request payload for SageMaker
@@ -50,35 +54,33 @@ func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]
 	// Marshal points to JSON
 	pointsJSON, err := json.Marshal(sagemakerReq)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to marshal points: %w", err)
+		return fmt.Errorf("failed to marshal points: %w", err)
 	}
 
 	// Create zip file with image binary and points JSON
 	zipBody, err := createZipPayload(image, pointsJSON)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create zip payload: %w", err)
+		return fmt.Errorf("failed to create zip payload: %w", err)
 	}
 
-	// Create SageMaker InvokeEndpoint request
-	input := &sagemakerruntime.InvokeEndpointInput{
-		EndpointName: &endpointName,
-		Body:         zipBody,
-		ContentType:  &[]string{"application/zip"}[0],
-	}
+	// Upload zip file to S3 with session name as file name
+	s3Key := fmt.Sprintf("requests/%s.zip", sessionName)
 
-	// Invoke SageMaker endpoint
-	result, err := ies.sagemakerClient.InvokeEndpoint(context.TODO(), input)
+	_, err = ies.s3Client.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket:      &bucketName,
+		Key:         &s3Key,
+		Body:        strings.NewReader(string(zipBody)),
+		ContentType: &[]string{"application/zip"}[0],
+		Metadata: map[string]string{
+			"session-name": sessionName,
+		},
+	})
+
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to invoke SageMaker endpoint: %w", err)
+		return fmt.Errorf("failed to upload zip to S3: %w", err)
 	}
 
-	// Extract images from zip response
-	resultImage, maskImage, err := extractImagesFromZip(result.Body)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to extract images from zip response: %w", err)
-	}
-
-	return resultImage, maskImage, nil
+	return nil
 }
 
 // createZipPayload creates a zip file containing the image binary and points JSON
@@ -114,45 +116,4 @@ func createZipPayload(imageBinary []byte, pointsJSON []byte) ([]byte, error) {
 	}
 
 	return zipBuffer.Bytes(), nil
-}
-
-// extractImagesFromZip extracts result and mask images from zip response
-func extractImagesFromZip(zipData []byte) ([]byte, []byte, error) {
-	// Create a reader from the zip data
-	zipReader, err := zip.NewReader(bytes.NewReader(zipData), int64(len(zipData)))
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create zip reader: %w", err)
-	}
-
-	var resultImage, maskImage []byte
-
-	// Read files from zip
-	for _, file := range zipReader.File {
-		rc, err := file.Open()
-		if err != nil {
-			return nil, nil, fmt.Errorf("failed to open file %s in zip: %w", file.Name, err)
-		}
-
-		data, err := io.ReadAll(rc)
-		rc.Close()
-		if err != nil {
-			return nil, nil, fmt.Errorf("failed to read file %s from zip: %w", file.Name, err)
-		}
-
-		switch file.Name {
-		case "result_image.bin":
-			resultImage = data
-		case "mask_image.bin":
-			maskImage = data
-		}
-	}
-
-	if resultImage == nil {
-		return nil, nil, fmt.Errorf("result_image.bin not found in zip response")
-	}
-	if maskImage == nil {
-		return nil, nil, fmt.Errorf("mask_image.bin not found in zip response")
-	}
-
-	return resultImage, maskImage, nil
 }

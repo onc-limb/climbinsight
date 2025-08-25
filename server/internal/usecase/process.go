@@ -41,7 +41,7 @@ func (pu *ProcessUsecase) Process(file *UploadFile, points []Point, sessionId st
 		domainPoints = append(domainPoints, domain.Point{X: p.X, Y: p.Y})
 	}
 	// AIサービスにリクエスト
-	processedImage, mask_data, err := pu.imageEditService.Extraction(*file.Data, domainPoints)
+	err := pu.imageEditService.ExtractionAsync(*file.Data, domainPoints, sessionId)
 	if err != nil {
 		return err
 	}
