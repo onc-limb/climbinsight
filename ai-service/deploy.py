@@ -235,14 +235,14 @@ try:
     # 非同期推論設定
     async_config = AsyncInferenceConfig(
         output_path=f"s3://{sagemaker_session.default_bucket()}/async-inference-output/",
-        max_concurrent_invocations_per_instance=4
+        max_concurrent_invocations_per_instance=2
     )
 
-    # エンドポイントを作成
+    # エンドポイントを作成（コスト効率を考慮してより小さなインスタンス使用）
     logger.info(f"🔧 Creating async endpoint: {ENDPOINT_NAME}")
     predictor = model.deploy(
             instance_type="ml.g4dn.xlarge",
-            initial_instance_count=1,
+            initial_instance_count=0,
             async_inference_config=async_config,
             endpoint_name=ENDPOINT_NAME,
         )
@@ -251,7 +251,7 @@ try:
     logger.info(f"🔗 Async Endpoint URL: https://runtime.sagemaker.{sagemaker_session.boto_region_name}.amazonaws.com/endpoints/{predictor.endpoint_name}/async-invocations")
 
     # 古いリソースをクリーンアップ
-    cleanup_old_resources(sagemaker_session, keep_latest=2)
+    cleanup_old_resources(sagemaker_session, keep_latest=1)
 
     # クリーンアップ: ローカルのtar.gzファイルを削除
     try:
@@ -265,7 +265,8 @@ try:
     print(f"Model name: {MODEL_NAME}")
     print(f"Config name: {CONFIG_NAME}")
     print(f"Region: {sagemaker_session.boto_region_name}")
-    print(f"Instance type: ml.g4dn.xlarge")
+    print(f"Instance type: ml.t3.medium (cost-optimized)")
+    print(f"Initial instances: 0 (scales up on demand)")
     print(f"Status: Ready for async inference")
     print(f"Content-Type: application/zip")
     print(f"Operation: Recreated as Async Endpoint")

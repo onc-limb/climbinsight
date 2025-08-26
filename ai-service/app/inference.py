@@ -1,11 +1,9 @@
 import json
-import base64
 import logging
 import zipfile
 import io
-import os
 import boto3
-from typing import Dict, Any
+from typing import Dict
 
 from sam import load_sam_model, process_image_bytes, Coordinate
 
@@ -43,66 +41,6 @@ def model_fn(model_dir: str):
         
     except Exception as e:
         logger.error(f"❌ Error loading model: {str(e)}")
-        raise e
-
-def process_s3_object(s3_bucket: str, s3_key: str) -> dict:
-    """
-    Process image from S3 object and upload results back to S3.
-    """
-    try:
-        # Extract session name from S3 key
-        session_name = os.path.splitext(os.path.basename(s3_key))[0]
-        logger.info(f"Processing S3 object: s3://{s3_bucket}/{s3_key} for session: {session_name}")
-        
-        # Download zip file from S3
-        logger.info("📥 Downloading zip file from S3...")
-        response = s3_client.get_object(Bucket=s3_bucket, Key=s3_key)
-        zip_data = response['Body'].read()
-        
-        # Parse zip file to extract image and points
-        image_bytes, points = parse_zip_data(zip_data)
-        
-        # Process image using SAM
-        logger.info(f"🔮 Processing image with {len(points)} points")
-        result_bytes, mask_bytes = process_image_bytes(image_bytes, points, predictor)
-        
-        # Create result zip file
-        result_zip_data = create_result_zip(result_bytes, mask_bytes)
-        
-        # Upload result to S3
-        result_s3_key = f"results/{session_name}.zip"
-        logger.info(f"📤 Uploading result to S3: s3://{s3_bucket}/{result_s3_key}")
-        
-        s3_client.put_object(
-            Bucket=s3_bucket,
-            Key=result_s3_key,
-            Body=result_zip_data,
-            ContentType='application/zip',
-            Metadata={
-                'session-name': session_name,
-                'processing-status': 'completed'
-            }
-        )
-        
-        # Send SNS notification
-        send_sns_notification(session_name)
-        
-        logger.info(f"✅ Processing completed for session: {session_name}")
-        
-        return {
-            'statusCode': 200,
-            'session_name': session_name,
-            'result_s3_key': result_s3_key,
-            'message': 'Processing completed successfully'
-        }
-        
-    except Exception as e:
-        logger.error(f"❌ Error processing S3 object: {str(e)}")
-        
-        # Send error SNS notification if session_name is available
-        if 'session_name' in locals():
-            send_sns_notification(session_name, error=str(e))
-        
         raise e
 
 def parse_zip_data(zip_data: bytes) -> tuple:
@@ -145,37 +83,6 @@ def create_result_zip(result_bytes: bytes, mask_bytes: bytes) -> bytes:
     
     zip_buffer.seek(0)
     return zip_buffer.getvalue()
-
-def send_sns_notification(session_name: str, error: str = None):
-    """
-    Send SNS notification to trigger Go server endpoint.
-    """
-    try:
-        sns_topic_arn = os.getenv('AWS_SNS_TOPIC_ARN')
-        if not sns_topic_arn:
-            logger.warning("⚠️  AWS_SNS_TOPIC_ARN not set, skipping SNS notification")
-            return
-        
-        message_data = {
-            'session_name': session_name,
-            'timestamp': '2025-01-01T00:00:00Z',  # You might want to use actual timestamp
-            'status': 'error' if error else 'completed'
-        }
-        
-        if error:
-            message_data['error'] = error
-        
-        # Send SNS message
-        response = sns_client.publish(
-            TopicArn=sns_topic_arn,
-            Message=json.dumps(message_data),
-            Subject=f"Image Processing {'Failed' if error else 'Completed'}: {session_name}"
-        )
-        
-        logger.info(f"📨 SNS notification sent: {response['MessageId']}")
-        
-    except Exception as e:
-        logger.error(f"❌ Error sending SNS notification: {str(e)}")
 
 # SageMaker inference functions (kept for compatibility)
 def input_fn(request_body: bytes, content_type: str = 'application/zip'):
@@ -241,53 +148,3 @@ def ping():
     except Exception as e:
         logger.error(f"❌ Health check failed: {str(e)}")
         return {"status": "unhealthy", "error": str(e)}, 503
-
-# Lambda-style handler for async processing
-def lambda_handler(event, context):
-    """
-    AWS Lambda handler for processing S3 events.
-    """
-    try:
-        logger.info("🚀 Lambda handler invoked")
-        logger.info(f"Event: {json.dumps(event)}")
-        
-        # Extract S3 bucket and key from event
-        if 'Records' in event:
-            for record in event['Records']:
-                if 's3' in record:
-                    s3_bucket = record['s3']['bucket']['name']
-                    s3_key = record['s3']['object']['key']
-                    
-                    # Process only request zip files
-                    if s3_key.startswith('requests/') and s3_key.endswith('.zip'):
-                        result = process_s3_object(s3_bucket, s3_key)
-                        return result
-        
-        # Direct invocation with bucket and key
-        elif 'bucket' in event and 'key' in event:
-            result = process_s3_object(event['bucket'], event['key'])
-            return result
-        
-        else:
-            raise ValueError("Invalid event format")
-            
-    except Exception as e:
-        logger.error(f"❌ Lambda handler error: {str(e)}")
-        return {
-            'statusCode': 500,
-            'error': str(e)
-        }
-
-# Alternative entry point for local testing
-if __name__ == "__main__":
-    # Initialize model
-    predictor = model_fn("/opt/ml/model")
-    
-    # Test processing
-    test_event = {
-        'bucket': 'test-bucket',
-        'key': 'requests/test-session.zip'
-    }
-    
-    result = lambda_handler(test_event, None)
-    print(f"Test result: {result}")
