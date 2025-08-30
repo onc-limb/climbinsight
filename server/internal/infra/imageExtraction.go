@@ -46,17 +46,32 @@ func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]
 	// Create authenticated HTTP client for Google Cloud Run
 	ctx := context.Background()
 
-	// Get GCP credentials from environment variable
-	gcpServiceAccountJSON := os.Getenv("GCP_SERVICE_ACCOUNT_JSON")
-	if gcpServiceAccountJSON == "" {
-		return nil, nil, fmt.Errorf("GCP_SERVICE_ACCOUNT_JSON environment variable not set")
+	// Get GCP credentials from individual environment variables (preferred) or JSON fallback
+	projectID := os.Getenv("GCP_PROJECT_ID")
+	privateKey := os.Getenv("GCP_PRIVATE_KEY")
+	clientEmail := os.Getenv("GCP_CLIENT_EMAIL")
+
+	if projectID == "" || privateKey == "" || clientEmail == "" {
+		return nil, nil, fmt.Errorf("failed to get credencial: %w", err)
+	}
+	// Build service account JSON from individual fields
+	serviceAccountJSON := map[string]interface{}{
+		"type":            "service_account",
+		"project_id":      projectID,
+		"private_key":     strings.ReplaceAll(privateKey, "\\n", "\n"), // Handle escaped newlines
+		"client_email":    clientEmail,
+		"token_uri":       "https://oauth2.googleapis.com/token",
+		"auth_uri":        "https://accounts.google.com/o/oauth2/auth",
+		"universe_domain": "googleapis.com",
 	}
 
-	// Clean up the JSON string (handle escaped newlines in private key)
-	gcpServiceAccountJSON = strings.ReplaceAll(gcpServiceAccountJSON, "\\n", "\n")
+	credentialsJSON, err := json.Marshal(serviceAccountJSON)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to marshal service account JSON: %w", err)
+	}
 
 	// Create ID token client with service account credentials
-	client, err := idtoken.NewClient(ctx, aiServerURL, option.WithCredentialsJSON([]byte(gcpServiceAccountJSON)))
+	client, err := idtoken.NewClient(ctx, aiServerURL, option.WithCredentialsJSON(credentialsJSON))
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create authenticated client: %w", err)
 	}
