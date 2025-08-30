@@ -87,7 +87,7 @@ def build_combined_mask_from_clicks(
 def apply_mask_to_image(image: np.ndarray, mask: np.ndarray) -> np.ndarray:
     if mask.ndim == 3:
         mask = mask[0]  # SAMからの出力が (1, H, W) の場合
-    bg_alpha = 0.2
+    bg_alpha = 0.1
     alpha = np.where(mask, 255, int(255 * bg_alpha)).astype(np.uint8)
     return np.dstack((image, alpha))  # RGB + Alpha
 
