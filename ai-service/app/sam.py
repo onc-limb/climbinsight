@@ -3,8 +3,8 @@ from typing import List
 import cv2
 import numpy as np
 import torch
-# from segment_anything import sam_model_registry, SamPredictor
-from mobile_sam import SamPredictor, build_sam_vit_t
+from segment_anything import sam_model_registry, SamPredictor
+# from mobile_sam import SamPredictor, build_sam_vit_t
 from PIL import Image
 import io
 import os
@@ -17,8 +17,8 @@ class Coordinate:
 
 def download_model():
     bucket_name = 'sam-models'
-    object_key = 'mobile_sam.pt'
-    download_path = '/tmp/mobile_sam.pt'
+    object_key = 'sam_vit_b.pth'
+    download_path = '/tmp/sam_vit_b.pth'
 
     session = boto3.session.Session()
     s3 = session.client(
@@ -38,9 +38,9 @@ def load_sam_model():
     checkpoint = download_model()  # ダウンロードしたモデルファイルのパス
 
     # SAM用のコード
-    # model_type = "vit_b"
-    # sam = sam_model_registry[model_type](checkpoint=checkpoint)
-    sam = build_sam_vit_t(checkpoint=checkpoint)
+    model_type = "vit_b"
+    sam = sam_model_registry[model_type](checkpoint=checkpoint)
+    # sam = build_sam_vit_t(checkpoint=checkpoint)
     sam.to("cuda" if torch.cuda.is_available() else "cpu")
     return SamPredictor(sam)
 
@@ -87,7 +87,7 @@ def build_combined_mask_from_clicks(
 def apply_mask_to_image(image: np.ndarray, mask: np.ndarray) -> np.ndarray:
     if mask.ndim == 3:
         mask = mask[0]  # SAMからの出力が (1, H, W) の場合
-    bg_alpha = 0.2
+    bg_alpha = 0.1
     alpha = np.where(mask, 255, int(255 * bg_alpha)).astype(np.uint8)
     return np.dstack((image, alpha))  # RGB + Alpha
 
