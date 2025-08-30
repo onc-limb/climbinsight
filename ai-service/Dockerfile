@@ -22,4 +22,4 @@ RUN find /usr/local -depth \
   -exec rm -rf '{}' +
 
 # サーバーを起動するコマンド
-CMD ["sh", "-c", "hypercorn server:app --bind 0.0.0.0:${PORT:-8000} --bind [::]:${PORT:-8000} --workers 2"]
+CMD ["sh", "-c", "hypercorn server:app --bind 0.0.0.0:${PORT:-8080} --bind [::]:${PORT:-8080} --workers 2"]
