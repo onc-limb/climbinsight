@@ -86,10 +86,10 @@ export default function Result() {
   if (!imageData || !content) return <LoadingScreen />;
 
   return (
-    <main className="max-w-xl mx-auto p-6 space-y-6">
+    <main className="max-w-xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
       {imageData && content && (
         <>
-          <h1 className="text-2xl font-bold text-center">処理結果</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-center">処理結果</h1>
           <Image
             ref={imgRef}
             src={imageData}
@@ -98,18 +98,18 @@ export default function Result() {
             unoptimized
             width={500}
             height={400}
-            className="w-full rounded-lg shadow"
+            className="w-full max-w-full rounded-lg shadow"
           />
 
           <button
             onClick={handleDownload}
-            className="block text-center bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+            className="w-full sm:w-auto block text-center bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 font-medium"
           >
             画像をダウンロード
           </button>
 
           <div className="p-4 rounded">
-            <p className="text-sm whitespace-pre-line bg-orange-50 border-4 border-orange-300 p-4 rounded-lg">
+            <p className="text-xs sm:text-sm whitespace-pre-line bg-orange-50 border-4 border-orange-300 p-3 sm:p-4 rounded-lg">
               {content}
             </p>
             <button
@@ -130,7 +130,7 @@ export default function Result() {
                   document.body.removeChild(toast);
                 }, 2000);
               }}
-              className="text-sm text-orange-700 hover:text-orange-900 border border-orange-700 rounded px-3 py-1 hover:shadow-lg"
+              className="mt-3 w-full sm:w-auto text-sm text-orange-700 hover:text-orange-900 border border-orange-700 rounded-lg px-4 py-2 hover:shadow-lg font-medium"
             >
               投稿文をコピー
             </button>
@@ -140,7 +140,7 @@ export default function Result() {
 
       <Link
         href="/"
-        className="text-sm text-orange-700 hover:text-orange-900 border border-orange-700 rounded px-3 py-1 hover:shadow-lg"
+        className="block w-full sm:w-auto text-center text-sm text-orange-700 hover:text-orange-900 border border-orange-700 rounded-lg px-4 py-2 hover:shadow-lg font-medium"
       >
         トップページへ戻る
       </Link>

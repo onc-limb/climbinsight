@@ -61,9 +61,9 @@ export default function ContentsInputForm() {
   };
 
   return (
-    <main className="max-w-xl mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-bold">ClimbInsight</h1>
-      <p className="text-gray-600">課題の情報を入力してハッシュタグを作成しよう！</p>
+    <main className="max-w-xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <h1 className="text-xl sm:text-2xl font-bold">ClimbInsight</h1>
+      <p className="text-sm sm:text-base text-gray-600">課題の情報を入力してハッシュタグを作成しよう！</p>
       <div className="container mx-auto space-y-4">
         <div className='space-y-2'>
           <Label htmlFor="grade" className="block text-sm font-medium">グレード</Label>
@@ -131,7 +131,7 @@ export default function ContentsInputForm() {
       <Button
         onClick={handleSubmit}
         disabled={loading}
-        className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-700 disabled:opacity-50"
+        className="w-full sm:w-auto bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-700 disabled:opacity-50 font-medium"
       >
         {loading ? "送信中..." : "送信する"}
       </Button>
