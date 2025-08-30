@@ -89,7 +89,7 @@ func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, nil, fmt.Errorf("failed to process image: %s", resp.Status)
+		return nil, nil, fmt.Errorf("failed to process image: %s, body: %s", resp.Status, string(body))
 	}
 
 	// Read zip response
