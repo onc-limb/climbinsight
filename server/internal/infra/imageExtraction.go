@@ -4,12 +4,16 @@ import (
 	"archive/zip"
 	"bytes"
 	"climbinsight/server/internal/domain"
-	"climbinsight/server/utils"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"strings"
+
+	"google.golang.org/api/idtoken"
+	"google.golang.org/api/option"
 )
 
 type ImageEditService struct{}
@@ -36,14 +40,34 @@ func (ies *ImageEditService) Extraction(image []byte, points []domain.Point) ([]
 		return nil, nil, fmt.Errorf("failed to create zip payload: %w", err)
 	}
 
-	// Send zip request to AI server
-	req, err := http.NewRequest("POST", os.Getenv("AI_SERVER_URL")+"/process", bytes.NewReader(zipBody))
+	// Send zip request to AI server with Google Cloud authentication
+	aiServerURL := os.Getenv("AI_SERVER_URL") + "/process"
+
+	// Create authenticated HTTP client for Google Cloud Run
+	ctx := context.Background()
+
+	// Get GCP credentials from environment variable
+	gcpServiceAccountJSON := os.Getenv("GCP_SERVICE_ACCOUNT_JSON")
+	if gcpServiceAccountJSON == "" {
+		return nil, nil, fmt.Errorf("GCP_SERVICE_ACCOUNT_JSON environment variable not set")
+	}
+
+	// Clean up the JSON string (handle escaped newlines in private key)
+	gcpServiceAccountJSON = strings.ReplaceAll(gcpServiceAccountJSON, "\\n", "\n")
+
+	// Create ID token client with service account credentials
+	client, err := idtoken.NewClient(ctx, aiServerURL, option.WithCredentialsJSON([]byte(gcpServiceAccountJSON)))
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to create authenticated client: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", aiServerURL, bytes.NewReader(zipBody))
 	if err != nil {
 		return nil, nil, err
 	}
 	req.Header.Set("Content-Type", "application/zip")
 
-	resp, err := utils.FetchWithRetry(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, nil, err
 	}
